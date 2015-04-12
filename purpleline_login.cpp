@@ -1,6 +1,5 @@
 #include "purpleline.hpp"
 
-
 void PurpleLine::login_start() {
     purple_connection_set_state(conn, PURPLE_CONNECTING);
     purple_connection_update_progress(conn, "Logging in", 0, 3);

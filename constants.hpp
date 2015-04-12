@@ -14,3 +14,5 @@
 
 #define LINE_USER_AGENT "purple-line (LINE for libpurple/Pidgin)"
 #define LINE_APPLICATION "DESKTOPWIN\t3.2.1.83\tWINDOWS\t5.1.2600-XP-x64"
+
+#define LINE_ACCOUNT_CERTIFICATE "line-certificate"

@@ -7,13 +7,6 @@
 #include <plugin.h>
 #include <prpl.h>
 
-#include "thriftclient.hpp"
-#include "poller.hpp"
-
-#define LINEPRPL_ID "prpl-mvirkkunen-line"
-
-#define LINE_ACCOUNT_CERTIFICATE "line-certificate"
-
 class PurpleLine;
 
 class PINVerifier {

@@ -20,8 +20,6 @@
 #include "purpleline.hpp"
 #include "wrapper.hpp"
 
-#define LINE_ACCOUNT_CERTIFICATE "line-certificate"
-
 std::string PurpleLine::markup_escape(std::string const &text) {
     gchar *escaped = purple_markup_escape_text(text.c_str(), text.size());
     std::string result(escaped);
