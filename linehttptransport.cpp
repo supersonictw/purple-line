@@ -22,6 +22,10 @@ LineHttpTransport::LineHttpTransport(
     port(port),
     ls_mode(ls_mode),
     auth_token(""),
+    state(ConnectionState::DISCONNECTED),
+    auto_reconnect(false),
+    reconnect_timeout_handle(0),
+    reconnect_timeout(0),
     ssl(NULL),
     connection_id(0),
     connection_close(false),
@@ -32,6 +36,11 @@ LineHttpTransport::LineHttpTransport(
 
 LineHttpTransport::~LineHttpTransport() {
     close();
+}
+
+void LineHttpTransport::set_auto_reconnect(bool auto_reconnect) {
+    if (state == ConnectionState::DISCONNECTED)
+        this->auto_reconnect = auto_reconnect;
 }
 
 void LineHttpTransport::set_auth_token(std::string token) {
@@ -47,8 +56,10 @@ int LineHttpTransport::content_length() {
 }
 
 void LineHttpTransport::open() {
-    if (ssl)
+    if (state != ConnectionState::DISCONNECTED)
         return;
+
+    state = ConnectionState::CONNECTED;
 
     in_progress = false;
 
@@ -63,8 +74,15 @@ void LineHttpTransport::open() {
 }
 
 void LineHttpTransport::close() {
-    if (!ssl)
+    if (state == ConnectionState::DISCONNECTED)
         return;
+
+    state = ConnectionState::DISCONNECTED;
+
+    if (reconnect_timeout_handle) {
+        purple_timeout_remove(reconnect_timeout_handle);
+        reconnect_timeout_handle = 0;
+    }
 
     purple_ssl_close(ssl);
     ssl = NULL;
@@ -106,7 +124,7 @@ void LineHttpTransport::consume_virt(uint32_t len) {
 }*/
 
 void LineHttpTransport::send_next() {
-    if (!ssl) {
+    if (state != ConnectionState::CONNECTED) {
         open();
         return;
     }
@@ -167,25 +185,26 @@ void LineHttpTransport::send_next() {
     purple_ssl_write(ssl, data_str.c_str(), data_str.size());
 }
 
-int LineHttpTransport::reconnect() {
-    close();
+int LineHttpTransport::reconnect_timeout_cb() {
+    reconnect_timeout = reconnect_timeout ? 10 : 60;
 
-    in_progress = false;
+    state = ConnectionState::DISCONNECTED;
 
     open();
 
-    // Don't repeat when using as timeout callback
     return FALSE;
 }
 
 void LineHttpTransport::ssl_connect(PurpleSslConnection *, PurpleInputCondition) {
+    reconnect_timeout = 0;
+
     purple_ssl_input_add(ssl, WRAPPER(LineHttpTransport::ssl_input), (gpointer)this);
 
     send_next();
 }
 
 void LineHttpTransport::ssl_input(PurpleSslConnection *, PurpleInputCondition cond) {
-    if (!ssl || cond != PURPLE_INPUT_READ)
+    if (state != ConnectionState::CONNECTED || cond != PURPLE_INPUT_READ)
         return;
 
     bool any = false;
@@ -197,15 +216,25 @@ void LineHttpTransport::ssl_input(PurpleSslConnection *, PurpleInputCondition co
             if (any)
                 break;
 
-            // Disconnected from server.
+            purple_debug_info("line", "Connection lost.\n");
 
             close();
 
-            // If there was a request in progress, re-open immediately to try again.
             if (in_progress) {
-                purple_debug_info("line", "Reconnecting immediately to re-send.\n");
+                if (auto_reconnect) {
+                    purple_debug_info("line", "Reconnecting in %ds...\n",
+                        reconnect_timeout);
 
-                open();
+                    state = ConnectionState::RECONNECTING;
+
+                    purple_timeout_add_seconds(
+                        reconnect_timeout,
+                        WRAPPER(LineHttpTransport::reconnect_timeout_cb),
+                        (gpointer)this);
+                } else {
+                    conn->wants_to_die = TRUE;
+                    purple_connection_error(conn, "LINE: Could not connect to server.");
+                }
             }
 
             return;
@@ -224,6 +253,7 @@ void LineHttpTransport::ssl_input(PurpleSslConnection *, PurpleInputCondition co
             if (status_code_ == 403) {
                 // Don't try to reconnect because this usually means the user has logged in from
                 // elsewhere.
+
                 // TODO: Check actual reason
 
                 conn->wants_to_die = TRUE;

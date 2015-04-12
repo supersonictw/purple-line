@@ -76,6 +76,7 @@ To do
 -----
 
 * Only fetch unseen messages, let a log plugin handle already seen messages
+* Implement timeouts for faster reconnections
 * Synchronize buddy list on the fly
   * Sync group/chat users more gracefully, show people joining/leaving
 * Editing buddy list

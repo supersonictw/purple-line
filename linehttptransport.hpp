@@ -16,6 +16,12 @@
 
 class LineHttpTransport : public apache::thrift::transport::TTransport {
 
+    enum class ConnectionState {
+        DISCONNECTED = 0,
+        CONNECTED = 1,
+        RECONNECTING = 2,
+    };
+
     class Request {
     public:
         std::string method;
@@ -34,6 +40,12 @@ class LineHttpTransport : public apache::thrift::transport::TTransport {
     bool ls_mode;
     std::string auth_token;
     std::string x_ls;
+
+    ConnectionState state;
+
+    bool auto_reconnect;
+    guint reconnect_timeout_handle;
+    int reconnect_timeout;
 
     PurpleSslConnection *ssl;
     int connection_id;
@@ -59,6 +71,7 @@ public:
         bool plain_http);
     ~LineHttpTransport();
 
+    void set_auto_reconnect(bool auto_reconnect);
     void set_auth_token(std::string token);
 
     virtual void open();
@@ -80,10 +93,11 @@ public:
     void ssl_input(PurpleSslConnection *, PurpleInputCondition cond);
     void ssl_error(PurpleSslConnection *, PurpleSslErrorType err);
 
+    int reconnect_timeout_cb();
+
 private:
 
     void send_next();
-    int reconnect();
 
     void try_parse_response_header();
 };

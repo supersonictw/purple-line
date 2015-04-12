@@ -63,6 +63,7 @@ void PurpleLine::login_start() {
 void PurpleLine::got_auth_token(std::string auth_token) {
     // Re-open output client to update persistent headers
     c_out->close();
+    c_out->set_auto_reconnect(true);
     c_out->set_path(LINE_COMMAND_PATH);
 
     c_out->set_auth_token(auth_token);
