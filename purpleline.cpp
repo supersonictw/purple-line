@@ -958,10 +958,11 @@ PurpleCmdRet PurpleLine::cmd_open(PurpleConversation *conv,
 
     std::string url = std::string(LINE_OS_URL) + "os/m/"+ att->id;
 
+    PurpleConversationType ctype = purple_conversation_get_type(conv);
+    std::string cname = std::string(purple_conversation_get_name(conv));
+
     http.request(url, HTTPFlag::auth | HTTPFlag::large,
-        [this, path, token,
-            ctype=purple_conversation_get_type(conv),
-            cname=std::string(purple_conversation_get_name(conv))]
+        [this, path, token, ctype, cname]
         (int status, const guchar *data, gsize len)
         {
             if (status == 200 && data && len > 0) {
