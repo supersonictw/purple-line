@@ -273,6 +273,8 @@ void LineHttpTransport::ssl_input(PurpleSslConnection *, PurpleInputCondition co
                 msg += err.reason;
 
                 if (err.code == line::ErrorCode::NOT_AUTHORIZED_DEVICE) {
+                    purple_account_remove_setting(acct, LINE_ACCOUNT_AUTH_TOKEN);
+
                     if (err.reason == "AUTHENTICATION_DIVESTED_BY_OTHER_DEVICE") {
                         msg = "LINE: You have been logged out because "
                             "you logged in from another device.";

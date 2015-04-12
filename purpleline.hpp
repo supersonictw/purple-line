@@ -160,7 +160,8 @@ private:
     // Login process methods, executed in this this order
     void login_start();
 
-    void got_auth_token(std::string auth_token);
+    void get_auth_token();
+    void set_auth_token(std::string auth_token);
     void get_last_op_revision();
     void get_profile();
     void get_contacts();

@@ -4,7 +4,56 @@ void PurpleLine::login_start() {
     purple_connection_set_state(conn, PURPLE_CONNECTING);
     purple_connection_update_progress(conn, "Logging in", 0, 3);
 
+    std::string auth_token(purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, ""));
+
+    if (auth_token.size()) {
+        // There's a stored authentication token, see if it works
+
+        set_auth_token(auth_token);
+
+        c_out->send_getLastOpRevision();
+        c_out->send([this, auth_token]() {
+            int64_t local_rev;
+
+            try {
+                local_rev = c_out->recv_getLastOpRevision();
+            } catch (line::TalkException &err) {
+                if (err.code == line::ErrorCode::AUTHENTICATION_FAILED
+                    || err.code == line::ErrorCode::NOT_AUTHORIZED_DEVICE)
+                {
+                    // Auth token expired, get a new one
+
+                    purple_debug_info("line", "Existing auth token expired.\n");
+
+                    purple_account_remove_setting(acct, LINE_ACCOUNT_AUTH_TOKEN);
+
+                    get_auth_token();
+                    return;
+                }
+
+                // Unknown error
+                throw;
+            }
+
+            poller.set_local_rev(local_rev);
+
+            set_auth_token(auth_token);
+
+            // Already got the last op revision, no need to call get_last_op_revision()
+
+            get_profile();
+        });
+    } else {
+        // Get a new auth token
+
+        get_auth_token();
+    }
+}
+
+void PurpleLine::get_auth_token() {
     std::string certificate(purple_account_get_string(acct, LINE_ACCOUNT_CERTIFICATE, ""));
+
+    purple_debug_info("line", "Logging in with credentials to get new auth token.\n");
 
     c_out->send_loginWithIdentityCredentialForCertificate(
         line::IdentityProvider::LINE,
@@ -31,10 +80,14 @@ void PurpleLine::login_start() {
 
         if (result.type == line::LoginResultType::SUCCESS && result.authToken != "")
         {
-            got_auth_token(result.authToken);
+            set_auth_token(result.authToken);
+
+            get_last_op_revision();
         }
         else if (result.type == line::LoginResultType::REQUIRE_DEVICE_CONFIRM)
         {
+            purple_debug_info("line", "Starting PIN verification.\n");
+
             pin_verifier.verify(result, [this](std::string auth_token, std::string certificate) {
                 if (certificate != "") {
                     purple_account_set_string(
@@ -43,7 +96,9 @@ void PurpleLine::login_start() {
                         certificate.c_str());
                 }
 
-                got_auth_token(auth_token);
+                set_auth_token(auth_token);
+
+                get_last_op_revision();
             });
         }
         else
@@ -59,7 +114,9 @@ void PurpleLine::login_start() {
     });
 }
 
-void PurpleLine::got_auth_token(std::string auth_token) {
+void PurpleLine::set_auth_token(std::string auth_token) {
+    purple_account_set_string(acct, LINE_ACCOUNT_AUTH_TOKEN, auth_token.c_str());
+
     // Re-open output client to update persistent headers
     c_out->close();
     c_out->set_auto_reconnect(true);
@@ -68,8 +125,6 @@ void PurpleLine::got_auth_token(std::string auth_token) {
     c_out->set_auth_token(auth_token);
     poller.set_auth_token(auth_token);
     http.set_auth_token(auth_token);
-
-    get_last_op_revision();
 }
 
 void PurpleLine::get_last_op_revision() {

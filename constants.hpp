@@ -16,3 +16,4 @@
 #define LINE_APPLICATION "DESKTOPWIN\t3.2.1.83\tWINDOWS\t5.1.2600-XP-x64"
 
 #define LINE_ACCOUNT_CERTIFICATE "line-certificate"
+#define LINE_ACCOUNT_AUTH_TOKEN "line-auth-token"
