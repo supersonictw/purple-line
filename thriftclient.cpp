@@ -28,7 +28,7 @@ void ThriftClient::set_auth_token(std::string token) {
 }
 
 void ThriftClient::send(std::function<void()> callback) {
-    http->request("POST", path, callback);
+    http->request("POST", path, "application/x-thrift", callback);
 }
 
 int ThriftClient::status_code() {

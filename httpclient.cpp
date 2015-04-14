@@ -24,13 +24,22 @@ void HTTPClient::set_auth_token(std::string token) {
 }
 
 void HTTPClient::request(std::string url, HTTPClient::CompleteFunc callback) {
-    request(url, HTTPFlag::none, callback);
+    request(url, HTTPFlag::NONE, callback);
 }
 
 void HTTPClient::request(std::string url, HTTPFlag flags, HTTPClient::CompleteFunc callback) {
+    request(url, flags, "", "", callback);
+}
+
+void HTTPClient::request(std::string url, HTTPFlag flags,
+    std::string content_type, std::string body,
+    HTTPClient::CompleteFunc callback)
+{
     Request *req = new Request();
     req->client = this;
     req->url = url;
+    req->content_type = content_type;
+    req->body = body;
     req->flags = flags;
     req->callback = callback;
     req->handle = nullptr;
@@ -53,7 +62,7 @@ void HTTPClient::execute_next() {
         purple_url_parse(req->url.c_str(), &host, &port, &path, nullptr, nullptr);
 
         ss
-            << "GET /" << path << " HTTP/1.1" "\r\n"
+            << (req->body.size() ? "POST" : "GET") << " /" << path << " HTTP/1.1" "\r\n"
             << "Connection: close\r\n"
             << "Host: " << host << ":" << port << "\r\n"
             << "User-Agent: " << LINE_USER_AGENT << "\r\n";
@@ -61,13 +70,21 @@ void HTTPClient::execute_next() {
         free(host);
         free(path);
 
-        if (req->flags & HTTPFlag::auth) {
+        if (req->flags & HTTPFlag::AUTH) {
             ss
                 << "X-Line-Application: " << LINE_APPLICATION << "\r\n"
                 << "X-Line-Access: " << auth_token << "\r\n";
         }
 
-        ss << "\r\n";
+        if (req->content_type.size())
+            ss << "Content-Type: " << req->content_type << "\r\n";
+
+        if (req->body.size())
+            ss << "Content-Length: " << req->body.size() << "\r\n";
+
+        ss
+            << "\r\n"
+            << req->body;
 
         in_flight++;
 
@@ -79,7 +96,7 @@ void HTTPClient::execute_next() {
             TRUE,
             ss.str().c_str(),
             TRUE,
-            (req->flags & HTTPFlag::large) ? (100 * 1024 * 1024) : -1,
+            (req->flags & HTTPFlag::LARGE) ? (100 * 1024 * 1024) : -1,
             purple_cb,
             (gpointer)req);
     }

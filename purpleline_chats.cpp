@@ -286,7 +286,7 @@ int PurpleLine::chat_send(int id, const char *message, PurpleMessageFlags flags)
         return 0;
     }
 
-    return send_message(purple_conversation_get_name(conv), markup_unescape(message));
+    return send_message(purple_conversation_get_name(conv), message);
 }
 
 PurpleChat *PurpleLine::find_blist_chat(const char *name) {

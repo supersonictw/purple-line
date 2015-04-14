@@ -26,7 +26,8 @@ class LineHttpTransport : public apache::thrift::transport::TTransport {
     public:
         std::string method;
         std::string path;
-        std::string data;
+        std::string content_type;
+        std::string body;
         std::function<void()> callback;
     };
 
@@ -60,7 +61,7 @@ class LineHttpTransport : public apache::thrift::transport::TTransport {
 
     std::queue<Request> request_queue;
 
-    bool connection_close;
+    bool keep_alive;
     int status_code_;
     int content_length_;
 
@@ -80,7 +81,8 @@ public:
     virtual uint32_t read_virt(uint8_t *buf, uint32_t len);
     void write_virt(const uint8_t *buf, uint32_t len);
 
-    void request(std::string method, std::string path, std::function<void()> callback);
+    void request(std::string method, std::string path, std::string content_type,
+        std::function<void()> callback);
     int status_code();
     int content_length();
 

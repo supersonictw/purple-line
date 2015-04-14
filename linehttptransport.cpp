@@ -28,7 +28,7 @@ LineHttpTransport::LineHttpTransport(
     reconnect_timeout(0),
     ssl(NULL),
     connection_id(0),
-    connection_close(false),
+    keep_alive(false),
     status_code_(0),
     content_length_(0)
 {
@@ -104,11 +104,14 @@ void LineHttpTransport::write_virt(const uint8_t *buf, uint32_t len) {
     request_buf.sputn((const char *)buf, len);
 }
 
-void LineHttpTransport::request(std::string method, std::string path, std::function<void()> callback) {
+void LineHttpTransport::request(std::string method, std::string path, std::string content_type,
+    std::function<void()> callback)
+{
     Request req;
     req.method = method;
     req.path = path;
-    req.data = request_buf.str();
+    req.content_type = content_type;
+    req.body = request_buf.str();
     req.callback = callback;
     request_queue.push(req);
 
@@ -116,12 +119,6 @@ void LineHttpTransport::request(std::string method, std::string path, std::funct
 
     send_next();
 }
-
-/*const uin8_t* LineHttpTransport::borrow_virt(uint8_t *buf, uint32_t *len) {
-}
-
-void LineHttpTransport::consume_virt(uint32_t len) {
-}*/
 
 void LineHttpTransport::send_next() {
     if (state != ConnectionState::CONNECTED) {
@@ -132,7 +129,7 @@ void LineHttpTransport::send_next() {
     if (in_progress || request_queue.empty())
         return;
 
-    connection_close = false;
+    keep_alive = false;
     status_code_ = -1;
     content_length_ = -1;
 
@@ -143,30 +140,12 @@ void LineHttpTransport::send_next() {
     data
         << next_req.method << " " << next_req.path << " HTTP/1.1" "\r\n";
 
-    if (next_req.method == "POST")
-        data << "Content-Length: " << next_req.data.size() << "\r\n";
-
-    if (ls_mode) {
-        if (x_ls != "")
-        {
-            data << "X-LS: " << x_ls << "\r\n";
-        }
-        else
-        {
-            data
-                << "Connection: Keep-Alive" "\r\n"
-                << "Content-Type: application/x-thrift" "\r\n"
-                << "Host: " << host << ":" << port << "\r\n"
-                << "Accept: application/x-thrift" "\r\n"
-                << "User-Agent: " LINE_USER_AGENT "\r\n"
-                << "X-Line-Application: " LINE_APPLICATION "\r\n";
-
-            if (auth_token != "")
-                data << "X-Line-Access: " << auth_token << "\r\n";
-        }
+    if (ls_mode && x_ls != "") {
+        data << "X-LS: " << x_ls << "\r\n";
     } else {
         data
-            << "Connection: Keep-Alive" "\r\n"
+            << "Connection: Keep-Alive\r\n"
+            << "Content-Type: " << next_req.content_type << "\r\n"
             << "Host: " << host << ":" << port << "\r\n"
             << "User-Agent: " LINE_USER_AGENT "\r\n"
             << "X-Line-Application: " LINE_APPLICATION "\r\n";
@@ -175,14 +154,22 @@ void LineHttpTransport::send_next() {
             data << "X-Line-Access: " << auth_token << "\r\n";
     }
 
+    if (next_req.method == "POST")
+        data << "Content-Length: " << next_req.body.size() << "\r\n";
+
     data
         << "\r\n"
-        << next_req.data;
+        << next_req.body;
 
     std::string data_str = data.str();
 
     in_progress = true;
-    purple_ssl_write(ssl, data_str.c_str(), data_str.size());
+    size_t written = purple_ssl_write(ssl, data_str.c_str(), data_str.size());
+
+    if (written != data_str.size()) {
+        purple_debug_warning("line", "Short write: %d out of %d!\n",
+            (int)written, (int)data_str.size());
+    }
 }
 
 int LineHttpTransport::reconnect_timeout_cb() {
@@ -309,7 +296,7 @@ void LineHttpTransport::ssl_input(PurpleSslConnection *, PurpleInputCondition co
             if (connection_id != connection_id_before)
                 break; // Callback closed connection, don't try to continue reading
 
-            if (connection_close) {
+            if (!keep_alive) {
                 close();
                 send_next();
                 break;
@@ -355,8 +342,8 @@ void LineHttpTransport::try_parse_response_header() {
             std::string value;
             std::getline(stream, value, '\r');
 
-            if (value == "Close" || value == "close")
-                connection_close = true;
+            if (value == "Keep-Alive" || value == "Keep-alive" || value == "keep-alive")
+                keep_alive = true;
         }
 
         stream.ignore(256, '\n');

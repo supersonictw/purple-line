@@ -45,7 +45,7 @@ static void init_info(PurplePluginInfo &i) {
 }
 
 static void init_prpl_info(PurplePluginProtocolInfo &i) {
-    i.options = (PurpleProtocolOptions)0;
+    i.options = (PurpleProtocolOptions)OPT_PROTO_IM_IMAGE;
     init_icon_spec(i.icon_spec);
 
     i.list_icon = &PurpleLine::list_icon;

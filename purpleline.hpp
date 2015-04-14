@@ -66,6 +66,9 @@ class PurpleLine {
 
     HTTPClient http;
 
+    // Remove if libpurple HTTP ever gets support for binary request bodies
+    LineHttpTransport os_http;
+
     friend class Poller;
     Poller poller;
 
@@ -141,8 +144,11 @@ private:
 
     line::Contact &get_up_to_date_contact(line::Contact &c);
 
-    int send_message(std::string to, std::string text);
-    void send_message(line::Message &msg);
+    int send_message(std::string to, const char *markup);
+    void send_message(
+        line::Message &msg,
+        std::function<void(line::Message &msg)> callback=std::function<void(line::Message &)>());
+    void upload_media(std::string message_id, std::string type, std::string data);
     void push_recent_message(std::string id);
 
     void signal_blist_node_removed(PurpleBlistNode *node);

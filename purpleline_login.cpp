@@ -124,6 +124,7 @@ void PurpleLine::set_auth_token(std::string auth_token) {
 
     c_out->set_auth_token(auth_token);
     poller.set_auth_token(auth_token);
+    os_http.set_auth_token(auth_token);
     http.set_auth_token(auth_token);
 }
 
@@ -155,7 +156,7 @@ void PurpleLine::get_profile() {
         if (profile.picturePath != "") {
             std::string pic_path = profile.picturePath.substr(1) + "/preview";
             //if (icon_path != purple_account_get_string(acct, "icon_path", "")) {
-                http.request(LINE_OS_URL + pic_path, HTTPFlag::auth,
+                http.request(LINE_OS_URL + pic_path, HTTPFlag::AUTH,
                     [this](int status, const guchar *data, gsize len)
                 {
                     if (status != 200 || !data)

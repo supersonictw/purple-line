@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <time.h>
 
 #include <debug.h>

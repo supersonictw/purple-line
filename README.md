@@ -68,8 +68,8 @@ Implemented
 * Message types
  * Text (send/receive)
  * Sticker (send via command/receive)
- * Image (receive preview)
- * Audio (receive preview)
+ * Image (send/receive)
+ * Audio (send/receive)
  * Location (receive)
 
 To do
@@ -88,7 +88,6 @@ To do
   * Inviting people to groups
 * Changing your account icon
 * Message types
-  * Image (send)
   * Audio/Video (send) File transfer API for sending?
   * Figure out what the other 15 message types mean...
 * Emoji (is it possible to tap into the smiley system for sending too?)

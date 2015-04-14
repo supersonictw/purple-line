@@ -1,6 +1,6 @@
 #include <algorithm>
-#include <iostream>
 #include <functional>
+#include <memory>
 
 #include <time.h>
 
@@ -88,11 +88,14 @@ PurpleLine::PurpleLine(PurpleConnection *conn, PurpleAccount *acct) :
     conn(conn),
     acct(acct),
     http(acct),
+    os_http(acct, conn, LINE_OS_SERVER, 443, false),
     poller(*this),
     pin_verifier(*this),
     next_purple_id(1)
 {
     c_out = boost::make_shared<ThriftClient>(acct, conn, LINE_LOGIN_PATH);
+
+
 }
 
 PurpleLine::~PurpleLine() {
@@ -459,7 +462,7 @@ void PurpleLine::handle_message(line::Message &msg, bool replay) {
                         ? msg.contentMetadata["PREVIEW_URL"]
                         : std::string(LINE_OS_URL) + "os/m/" + msg.id + "/preview";
 
-                    http.request(preview_url, HTTPFlag::auth | HTTPFlag::large,
+                    http.request(preview_url, HTTPFlag::AUTH | HTTPFlag::LARGE,
                         [this, id, conv](int status, const guchar *data, gsize len)
                         {
                             if (status == 200 && data && len > 0) {
@@ -471,7 +474,7 @@ void PurpleLine::handle_message(line::Message &msg, bool replay) {
                             } else {
                                 purple_debug_warning(
                                     "line",
-                                    "Couldn't download image message. Status: %d",
+                                    "Couldn't download image message. Status: %d\n",
                                     status);
                             }
 
@@ -581,24 +584,93 @@ line::Contact &PurpleLine::get_up_to_date_contact(line::Contact &c) {
     return (contacts.count(c.mid) != 0) ? contacts[c.mid] : c;
 }
 
-int PurpleLine::send_message(std::string to, std::string text) {
-    line::Message msg;
+int PurpleLine::send_message(std::string to, const char *markup) {
+    // Parse markup and send message as parts if it contains images
 
-    msg.contentType = line::ContentType::NONE;
-    msg.from = profile.mid;
-    msg.to = to;
-    msg.text = text;
+    bool any_sent = false;
 
-    send_message(msg);
+    for (const char *p = markup; p && *p; ) {
+        const char *start, *end;
+        GData *attributes;
 
-    return 1;
+        bool img_found = purple_markup_find_tag("IMG", p, &start, &end, &attributes);
+
+        std::string text;
+
+        if (img_found) {
+            // Image found but there's text before it, store it
+
+            text = std::string(p, start - p);
+            p = end + 1;
+        } else {
+            // No image found, store the rest of the text
+
+            text = std::string(p);
+
+            // Break the loop
+
+            p = NULL;
+        }
+
+        // If the text is not all whitespace, send it as a text message
+        if (text.find_first_not_of("\t\n\r ") != std::string::npos)
+        {
+            line::Message msg;
+
+            msg.contentType = line::ContentType::NONE;
+            msg.from = profile.mid;
+            msg.to = to;
+            msg.text = markup_unescape(text);
+
+            send_message(msg);
+
+            any_sent = true;
+        }
+
+        if (img_found) {
+            // Image test
+
+            int image_id = std::stoi((char *)g_datalist_get_data(&attributes, "id"));
+            g_datalist_clear(&attributes);
+
+            std::stringstream ss;
+            ss << "(img ID: " << image_id << ")";
+
+            PurpleStoredImage *img = purple_imgstore_find_by_id(image_id);
+            if (!img) {
+                purple_debug_warning("line", "Tried to send non-existent image: %d\n", image_id);
+                continue;
+            }
+
+            std::string img_data(
+                (const char *)purple_imgstore_get_data(img),
+                purple_imgstore_get_size(img));
+
+            line::Message msg;
+
+            msg.contentType = line::ContentType::IMAGE;
+            msg.from = profile.mid;
+            msg.to = to;
+
+            send_message(msg, [this, img_data](line::Message &msg_back) {
+                upload_media(msg_back.id, "image", img_data);
+            });
+
+            any_sent = true;
+        }
+    }
+
+    return any_sent ? 1 : 0;
 }
 
-void PurpleLine::send_message(line::Message &msg) {
+void PurpleLine::send_message(
+    line::Message &msg,
+    std::function<void(line::Message &)> callback)
+{
     std::string to(msg.to);
 
     c_out->send_sendMessage(0, msg);
-    c_out->send([this, to]() {
+    c_out->send([this, to, callback]() {
         line::Message msg_back;
 
         try {
@@ -628,11 +700,63 @@ void PurpleLine::send_message(line::Message &msg) {
         // Kludge >_>
         if (to[0] == 'u')
             push_recent_message(msg_back.id);
+
+        if (callback)
+            callback(msg_back);
     });
 }
 
+void PurpleLine::upload_media(std::string message_id, std::string type, std::string data) {
+    std::string boundary;
+
+    do {
+        gchar *random_string = purple_uuid_random();
+        boundary = random_string;
+        g_free(random_string);
+    } while (data.find(boundary) != std::string::npos);
+
+    std::stringstream body;
+
+    body
+        << "--" << boundary << "\r\n"
+        << "Content-Disposition: form-data; name=\"params\"\r\n"
+        << "\r\n"
+        << "{"
+        << "\"name\":\"media\","
+        << "\"oid\":\"" << message_id << "\","
+        << "\"size\":\"" << data.size() << "\","
+        << "\"type\":\"" << type << "\","
+        << "\"ver\":\"1.0\""
+        << "}"
+        << "\r\n--" << boundary << "\r\n"
+        << "Content-Disposition: form-data; name=\"file\"; filename=\"media\"\r\n"
+        << "Content-Type: image/jpeg\r\n"
+        << "\r\n"
+        << data
+        << "\r\n--" << boundary << "--\r\n";
+
+    std::string content_type = std::string("multipart/form-data; boundary=") + boundary;
+
+    os_http.write_virt((const uint8_t *)body.str().c_str(), body.tellp());
+
+    os_http.request("POST", "/talk/m/upload.nhn", content_type, [this]() {
+        if (os_http.status_code() != 201) {
+            purple_debug_warning(
+                "line",
+                "Couldn't upload message media. Status: %d\n",
+                os_http.status_code());
+        }
+    });
+}
+
+void PurpleLine::push_recent_message(std::string id) {
+    recent_messages.push_back(id);
+    if (recent_messages.size() > 50)
+        recent_messages.pop_front();
+}
+
 int PurpleLine::send_im(const char *who, const char *message, PurpleMessageFlags flags) {
-    return send_message(who, markup_unescape(message));
+    return send_message(who, message);
 }
 
 void PurpleLine::remove_buddy(PurpleBuddy *buddy, PurpleGroup *) {
@@ -839,12 +963,6 @@ void PurpleLine::signal_deleting_conversation(PurpleConversation *conv) {
     }
 }
 
-void PurpleLine::push_recent_message(std::string id) {
-    recent_messages.push_back(id);
-    if (recent_messages.size() > 50)
-        recent_messages.pop_front();
-}
-
 static const char *sticker_fields[] = { "STKVER", "STKPKGID", "STKID" };
 
 PurpleCmdRet PurpleLine::cmd_sticker(PurpleConversation *conv,
@@ -959,7 +1077,7 @@ PurpleCmdRet PurpleLine::cmd_open(PurpleConversation *conv,
     PurpleConversationType ctype = purple_conversation_get_type(conv);
     std::string cname = std::string(purple_conversation_get_name(conv));
 
-    http.request(url, HTTPFlag::auth | HTTPFlag::large,
+    http.request(url, HTTPFlag::AUTH | HTTPFlag::LARGE,
         [this, path, token, ctype, cname]
         (int status, const guchar *data, gsize len)
         {
