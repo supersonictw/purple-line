@@ -319,23 +319,22 @@ void LineHttpTransport::ssl_read(gint, PurpleInputCondition) {
                     } else if (err.reason == "REVOKE") {
                         msg = "LINE: This device was logged out via the mobile app.";
                     }
+
+                    conn->wants_to_die = TRUE;
                 }
 
-                conn->wants_to_die = TRUE;
                 purple_connection_error(conn, msg.c_str());
                 return;
             } catch (apache::thrift::TApplicationException &err) {
                 std::string msg = "LINE: Application error: ";
                 msg += err.what();
 
-                conn->wants_to_die = TRUE;
                 purple_connection_error(conn, msg.c_str());
                 return;
             } catch (apache::thrift::transport::TTransportException &err) {
                 std::string msg = "LINE: Transport error: ";
                 msg += err.what();
 
-                conn->wants_to_die = TRUE;
                 purple_connection_error(conn, msg.c_str());
                 return;
             }
