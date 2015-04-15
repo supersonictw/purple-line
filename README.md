@@ -25,19 +25,23 @@ How to install
 
 Make sure you have the required prerequisites:
 
-* libpurple - probably available via package manager
+* libpurple - probably available from your package manager
 * Apache Thrift compiler and C++ library - v0.9.1 should be stable. The Git version and OS packages
   are sometimes a bit iffy. Compiling by hand is your best bet.
 * line_main.thrift - not included, must be placed in the project root directory. For the time being,
   you can acquire this file from the documentation at http://altrepo.eu/
 
-Then simply run:
+To install the plugin system-wide, run:
 
     make
-    make install
+    sudo make install
 
-This will build and install the plugin into your home directory. Builds are only tested on Arch
-Linux and a recent Ubuntu for now.
+You can also install the plugin for your user only by running:
+
+    make
+    make user-install
+
+Builds are only tested on Arch Linux and a recent Ubuntu for now.
 
 Implemented
 -----------

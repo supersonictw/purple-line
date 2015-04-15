@@ -2,7 +2,12 @@ CXX = g++
 CXXFLAGS = -g -Wall -shared -fPIC \
 	-DHAVE_INTTYPES_H -DHAVE_CONFIG_H -DPURPLE_PLUGINS \
 	`pkg-config --cflags purple thrift`
+THRIFT = thrift
+
 LIBS = `pkg-config --libs purple thrift`
+
+PURPLE_PLUGIN_DIR:=$(shell pkg-config --variable=plugindir purple)
+PURPLE_DATA_ROOT_DIR:=$(shell pkg-config --variable=datarootdir purple)
 
 MAIN = libline.so
 
@@ -26,17 +31,29 @@ $(MAIN): $(OBJS)
 
 thrift_line: line_main.thrift
 	mkdir -p thrift_line
-	thrift --gen cpp -out thrift_line line_main.thrift
+	$(THRIFT) --gen cpp -out thrift_line line_main.thrift
 
+.PHONY: clean
 clean:
 	rm -f $(MAIN)
 	rm -f *.o
 	rm -rf thrift_line
 
-# TODO: Make proper install target
-install:
-	mkdir -p ~/.purple/plugins
-	cp $(MAIN) ~/.purple/plugins
+.PHONY: user-install
+user-install: all
+	install -D $(MAIN) ~/.purple/plugins/$(MAIN)
+
+.PHONY: user-uninstall
+user-uninstall:
+	rm -f ~/.purple/plugins/$(MAIN)
+
+.PHONY: install
+install: all
+	install -D $(MAIN) $(DESTDIR)$(PURPLE_PLUGIN_DIR)/$(MAIN)
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(PURPLE_PLUGIN_DIR)/$(MAIN)
 
 depend: .depend
 
@@ -45,5 +62,3 @@ depend: .depend
 	$(CXX) $(CXXFLAGS) -MM $(REAL_SRCS) >>.depend
 
 -include .depend
-
-.PHONY: clean
