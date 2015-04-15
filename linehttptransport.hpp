@@ -49,11 +49,15 @@ class LineHttpTransport : public apache::thrift::transport::TTransport {
     int reconnect_timeout;
 
     PurpleSslConnection *ssl;
+    guint input_handle;
     int connection_id;
 
     uint8_t buf[BUFFER_SIZE];
 
     std::stringbuf request_buf;
+
+    size_t request_written;
+    std::string request_data;
 
     bool in_progress;
     std::string response_str;
@@ -89,15 +93,16 @@ public:
     //virtual const uin8_t* borrow_virt(uint8_t *buf, uint32_t *len);
     //virtual void consume_virt(uint32_t len);
 
-//private:
+private:
+
+    void write_request();
 
     void ssl_connect(PurpleSslConnection *, PurpleInputCondition);
-    void ssl_input(PurpleSslConnection *, PurpleInputCondition cond);
     void ssl_error(PurpleSslConnection *, PurpleSslErrorType err);
+    void ssl_write(int, PurpleInputCondition);
+    void ssl_read(int, PurpleInputCondition);
 
     int reconnect_timeout_cb();
-
-private:
 
     void send_next();
 

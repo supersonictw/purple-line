@@ -27,7 +27,9 @@ LineHttpTransport::LineHttpTransport(
     reconnect_timeout_handle(0),
     reconnect_timeout(0),
     ssl(NULL),
+    input_handle(0),
     connection_id(0),
+    request_written(0),
     keep_alive(false),
     status_code_(0),
     content_length_(0)
@@ -73,6 +75,20 @@ void LineHttpTransport::open() {
         (gpointer)this);
 }
 
+void LineHttpTransport::ssl_connect(PurpleSslConnection *, PurpleInputCondition) {
+    reconnect_timeout = 0;
+
+    send_next();
+}
+
+void LineHttpTransport::ssl_error(PurpleSslConnection *, PurpleSslErrorType err) {
+    purple_debug_warning("line", "SSL error: %s\n", purple_ssl_strerror(err));
+
+    ssl = nullptr;
+
+    purple_connection_ssl_error(conn, err);
+}
+
 void LineHttpTransport::close() {
     if (state == ConnectionState::DISCONNECTED)
         return;
@@ -82,6 +98,11 @@ void LineHttpTransport::close() {
     if (reconnect_timeout_handle) {
         purple_timeout_remove(reconnect_timeout_handle);
         reconnect_timeout_handle = 0;
+    }
+
+    if (input_handle) {
+        purple_input_remove(input_handle);
+        input_handle = 0;
     }
 
     purple_ssl_close(ssl);
@@ -161,15 +182,13 @@ void LineHttpTransport::send_next() {
         << "\r\n"
         << next_req.body;
 
-    std::string data_str = data.str();
-
+    request_data = data.str();
+    request_written = 0;
     in_progress = true;
-    size_t written = purple_ssl_write(ssl, data_str.c_str(), data_str.size());
 
-    if (written != data_str.size()) {
-        purple_debug_warning("line", "Short write: %d out of %d!\n",
-            (int)written, (int)data_str.size());
-    }
+    input_handle = purple_input_add(ssl->fd, PURPLE_INPUT_WRITE,
+        WRAPPER(LineHttpTransport::ssl_write), (gpointer)this);
+    ssl_write(ssl->fd, PURPLE_INPUT_WRITE);
 }
 
 int LineHttpTransport::reconnect_timeout_cb() {
@@ -182,17 +201,47 @@ int LineHttpTransport::reconnect_timeout_cb() {
     return FALSE;
 }
 
-void LineHttpTransport::ssl_connect(PurpleSslConnection *, PurpleInputCondition) {
-    reconnect_timeout = 0;
+void LineHttpTransport::write_request() {
+    if (request_written < request_data.size()) {
+        size_t r = purple_ssl_write(ssl,
+            request_data.c_str() + request_written, request_data.size() - request_written);
 
-    purple_ssl_input_add(ssl, WRAPPER(LineHttpTransport::ssl_input), (gpointer)this);
+        request_written += r;
 
-    send_next();
+        purple_debug_info("line", "Wrote: %d, %d out of %d!\n",
+                (int)r, (int)request_written, (int)request_data.size());
+    }
 }
 
-void LineHttpTransport::ssl_input(PurpleSslConnection *, PurpleInputCondition cond) {
-    if (state != ConnectionState::CONNECTED || cond != PURPLE_INPUT_READ)
+void LineHttpTransport::ssl_write(gint, PurpleInputCondition) {
+    if (state != ConnectionState::CONNECTED) {
+        if (input_handle) {
+            purple_input_remove(input_handle);
+            input_handle = 0;
+        }
+
         return;
+    }
+
+    if (request_written < request_data.size()) {
+        request_written += purple_ssl_write(ssl,
+            request_data.c_str() + request_written, request_data.size() - request_written);
+    }
+
+    if (request_written >= request_data.size()) {
+        purple_input_remove(input_handle);
+
+        input_handle = purple_input_add(ssl->fd, PURPLE_INPUT_READ,
+            WRAPPER(LineHttpTransport::ssl_read), (gpointer)this);
+    }
+}
+
+void LineHttpTransport::ssl_read(gint, PurpleInputCondition) {
+    if (state != ConnectionState::CONNECTED) {
+        purple_input_remove(input_handle);
+        input_handle = 0;
+        return;
+    }
 
     bool any = false;
 
@@ -237,6 +286,8 @@ void LineHttpTransport::ssl_input(PurpleSslConnection *, PurpleInputCondition co
         try_parse_response_header();
 
         if (content_length_ >= 0 && response_str.size() >= (size_t)content_length_) {
+            purple_input_remove(input_handle);
+
             if (status_code_ == 403) {
                 // Don't try to reconnect because this usually means the user has logged in from
                 // elsewhere.
@@ -305,14 +356,6 @@ void LineHttpTransport::ssl_input(PurpleSslConnection *, PurpleInputCondition co
             send_next();
         }
     }
-}
-
-void LineHttpTransport::ssl_error(PurpleSslConnection *, PurpleSslErrorType err) {
-    purple_debug_warning("line", "SSL error: %s\n", purple_ssl_strerror(err));
-
-    ssl = nullptr;
-
-    purple_connection_ssl_error(conn, err);
 }
 
 void LineHttpTransport::try_parse_response_header() {
