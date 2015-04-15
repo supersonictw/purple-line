@@ -39,7 +39,6 @@ class LineHttpTransport : public apache::thrift::transport::TTransport {
     std::string host;
     uint16_t port;
     bool ls_mode;
-    std::string auth_token;
     std::string x_ls;
 
     ConnectionState state;
@@ -77,7 +76,6 @@ public:
     ~LineHttpTransport();
 
     void set_auto_reconnect(bool auto_reconnect);
-    void set_auth_token(std::string token);
 
     virtual void open();
     virtual void close();

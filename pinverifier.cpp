@@ -49,7 +49,8 @@ void PINVerifier::verify(
         WRAPPER(PINVerifier::timeout_cb),
         (gpointer)this);
 
-    http.set_auth_token(verifier);
+    parent.set_auth_token(verifier);
+
     http.request(LINE_VERIFICATION_URL, HTTPFlag::AUTH,
         [this, verifier, success](int status, const guchar *data, gsize len)
     {

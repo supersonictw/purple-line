@@ -24,7 +24,6 @@ public:
     ~Poller();
 
     void start();
-    void set_auth_token(std::string token) { client->set_auth_token(token); }
     void set_local_rev(int64_t local_rev) { this->local_rev = local_rev; }
 
 private:

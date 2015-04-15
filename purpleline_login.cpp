@@ -4,15 +4,11 @@ void PurpleLine::login_start() {
     purple_connection_set_state(conn, PURPLE_CONNECTING);
     purple_connection_update_progress(conn, "Logging in", 0, 3);
 
-    std::string auth_token(purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, ""));
-
-    if (auth_token.size()) {
+    if (purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, NULL)) {
         // There's a stored authentication token, see if it works
 
-        set_auth_token(auth_token);
-
         c_out->send_getLastOpRevision();
-        c_out->send([this, auth_token]() {
+        c_out->send([this]() {
             int64_t local_rev;
 
             try {
@@ -36,8 +32,6 @@ void PurpleLine::login_start() {
             }
 
             poller.set_local_rev(local_rev);
-
-            set_auth_token(auth_token);
 
             // Already got the last op revision, no need to call get_last_op_revision()
 
@@ -121,11 +115,6 @@ void PurpleLine::set_auth_token(std::string auth_token) {
     c_out->close();
     c_out->set_auto_reconnect(true);
     c_out->set_path(LINE_COMMAND_PATH);
-
-    c_out->set_auth_token(auth_token);
-    poller.set_auth_token(auth_token);
-    os_http.set_auth_token(auth_token);
-    http.set_auth_token(auth_token);
 }
 
 void PurpleLine::get_last_op_revision() {

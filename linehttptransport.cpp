@@ -21,7 +21,6 @@ LineHttpTransport::LineHttpTransport(
     host(host),
     port(port),
     ls_mode(ls_mode),
-    auth_token(""),
     state(ConnectionState::DISCONNECTED),
     auto_reconnect(false),
     reconnect_timeout_handle(0),
@@ -43,10 +42,6 @@ LineHttpTransport::~LineHttpTransport() {
 void LineHttpTransport::set_auto_reconnect(bool auto_reconnect) {
     if (state == ConnectionState::DISCONNECTED)
         this->auto_reconnect = auto_reconnect;
-}
-
-void LineHttpTransport::set_auth_token(std::string token) {
-    this->auth_token = token;
 }
 
 int LineHttpTransport::status_code() {
@@ -171,7 +166,8 @@ void LineHttpTransport::send_next() {
             << "User-Agent: " LINE_USER_AGENT "\r\n"
             << "X-Line-Application: " LINE_APPLICATION "\r\n";
 
-        if (auth_token != "")
+        const char *auth_token = purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, "");
+        if (auth_token)
             data << "X-Line-Access: " << auth_token << "\r\n";
     }
 

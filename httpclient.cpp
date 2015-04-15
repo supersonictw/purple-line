@@ -19,10 +19,6 @@ HTTPClient::~HTTPClient() {
     }
 }
 
-void HTTPClient::set_auth_token(std::string token) {
-    this->auth_token = token;
-}
-
 void HTTPClient::request(std::string url, HTTPClient::CompleteFunc callback) {
     request(url, HTTPFlag::NONE, callback);
 }
@@ -73,7 +69,8 @@ void HTTPClient::execute_next() {
         if (req->flags & HTTPFlag::AUTH) {
             ss
                 << "X-Line-Application: " << LINE_APPLICATION << "\r\n"
-                << "X-Line-Access: " << auth_token << "\r\n";
+                << "X-Line-Access: "
+                    << purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, "") << "\r\n";
         }
 
         if (req->content_type.size())

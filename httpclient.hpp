@@ -38,8 +38,6 @@ class HTTPClient {
 
     PurpleAccount *acct;
 
-    std::string auth_token;
-
     std::list<Request *> request_queue;
     int in_flight;
 
@@ -54,8 +52,6 @@ public:
 
     HTTPClient(PurpleAccount *acct);
     ~HTTPClient();
-
-    void set_auth_token(std::string token);
 
     void request(std::string url, CompleteFunc callback);
     void request(std::string url, HTTPFlag flags, CompleteFunc callback);

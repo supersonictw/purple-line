@@ -23,10 +23,6 @@ void ThriftClient::set_auto_reconnect(bool auto_reconnect) {
     http->set_auto_reconnect(auto_reconnect);
 }
 
-void ThriftClient::set_auth_token(std::string token) {
-    http->set_auth_token(token);
-}
-
 void ThriftClient::send(std::function<void()> callback) {
     http->request("POST", path, "application/x-thrift", callback);
 }

@@ -25,7 +25,6 @@ public:
 
     void set_path(std::string path);
     void set_auto_reconnect(bool auto_reconnect);
-    void set_auth_token(std::string token);
     void send(std::function<void()> callback);
 
     int status_code();
