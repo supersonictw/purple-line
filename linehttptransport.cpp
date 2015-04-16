@@ -137,13 +137,13 @@ void LineHttpTransport::request(std::string method, std::string path, std::strin
 }
 
 void LineHttpTransport::send_next() {
-    if (in_progress || request_queue.empty())
-        return;
-
     if (state != ConnectionState::CONNECTED) {
         open();
         return;
     }
+
+    if (in_progress || request_queue.empty())
+        return;
 
     keep_alive = ls_mode;
     status_code_ = -1;
@@ -205,7 +205,7 @@ void LineHttpTransport::write_request() {
         request_written += r;
 
         purple_debug_info("line", "Wrote: %d, %d out of %d!\n",
-                (int)r, (int)request_written, (int)request_data.size());
+            (int)r, (int)request_written, (int)request_data.size());
     }
 }
 
@@ -282,6 +282,7 @@ void LineHttpTransport::ssl_read(gint, PurpleInputCondition) {
 
         if (content_length_ >= 0 && response_str.size() >= (size_t)content_length_) {
             purple_input_remove(input_handle);
+            input_handle = 0;
 
             if (status_code_ == 403) {
                 // Don't try to reconnect because this usually means the user has logged in from

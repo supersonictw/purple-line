@@ -4,11 +4,13 @@ void PurpleLine::login_start() {
     purple_connection_set_state(conn, PURPLE_CONNECTING);
     purple_connection_update_progress(conn, "Logging in", 0, 3);
 
-    if (purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, NULL)) {
+    std::string auth_token = purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, "");
+
+    if (auth_token != "") {
         // There's a stored authentication token, see if it works
 
         c_out->send_getLastOpRevision();
-        c_out->send([this]() {
+        c_out->send([this, auth_token]() {
             int64_t local_rev;
 
             try {
@@ -30,6 +32,8 @@ void PurpleLine::login_start() {
                 // Unknown error
                 throw;
             }
+
+            set_auth_token(auth_token);
 
             poller.set_local_rev(local_rev);
 
