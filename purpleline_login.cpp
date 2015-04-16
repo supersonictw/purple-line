@@ -1,3 +1,7 @@
+#include <glib.h>
+
+#include <core.h>
+
 #include "purpleline.hpp"
 
 void PurpleLine::login_start() {
@@ -53,13 +57,20 @@ void PurpleLine::get_auth_token() {
 
     purple_debug_info("line", "Logging in with credentials to get new auth token.\n");
 
+    std::string ui_name = "purple-line";
+
+    GHashTable *ui_info = purple_core_get_ui_info();
+    gpointer ui_name_p = g_hash_table_lookup(ui_info, "name");
+    if (ui_name_p)
+        ui_name = (char *)ui_name_p;
+
     c_out->send_loginWithIdentityCredentialForCertificate(
         line::IdentityProvider::LINE,
         purple_account_get_username(acct),
         purple_account_get_password(acct),
         true,
         "127.0.0.1",
-        "purple-line (Pidgin)",
+        ui_name,
         certificate);
     c_out->send([this]() {
         line::LoginResult result;
