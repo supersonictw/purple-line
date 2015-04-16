@@ -137,15 +137,15 @@ void LineHttpTransport::request(std::string method, std::string path, std::strin
 }
 
 void LineHttpTransport::send_next() {
+    if (in_progress || request_queue.empty())
+        return;
+
     if (state != ConnectionState::CONNECTED) {
         open();
         return;
     }
 
-    if (in_progress || request_queue.empty())
-        return;
-
-    keep_alive = false;
+    keep_alive = ls_mode;
     status_code_ = -1;
     content_length_ = -1;
 
@@ -264,8 +264,7 @@ void LineHttpTransport::ssl_read(gint, PurpleInputCondition) {
                         WRAPPER(LineHttpTransport::reconnect_timeout_cb),
                         (gpointer)this);
                 } else {
-                    conn->wants_to_die = TRUE;
-                    purple_connection_error(conn, "LINE: Could not connect to server.");
+                    purple_connection_error(conn, "LINE: Lost connection to server.");
                 }
             }
 
@@ -315,6 +314,8 @@ void LineHttpTransport::ssl_read(gint, PurpleInputCondition) {
                     } else if (err.reason == "REVOKE") {
                         msg = "LINE: This device was logged out via the mobile app.";
                     }
+
+                    // Don't try to reconnect so we don't fight over the session with another client
 
                     conn->wants_to_die = TRUE;
                 }

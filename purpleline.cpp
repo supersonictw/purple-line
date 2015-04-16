@@ -94,8 +94,7 @@ PurpleLine::PurpleLine(PurpleConnection *conn, PurpleAccount *acct) :
     next_purple_id(1)
 {
     c_out = boost::make_shared<ThriftClient>(acct, conn, LINE_LOGIN_PATH);
-
-
+    os_http.set_auto_reconnect(true);
 }
 
 PurpleLine::~PurpleLine() {
