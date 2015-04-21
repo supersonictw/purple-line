@@ -248,12 +248,12 @@ void PurpleLine::get_groups() {
 void PurpleLine::get_rooms() {
     c_out->send_getMessageBoxCompactWrapUpList(1, 65535);
     c_out->send([this]() {
-        line::TMessageBoxWrapUpResponse wrap_up_list;
+        line::MessageBoxWrapUpList wrap_up_list;
         c_out->recv_getMessageBoxCompactWrapUpList(wrap_up_list);
 
         std::set<std::string> uids;
 
-        for (line::TMessageBoxWrapUp &ent: wrap_up_list.messageBoxWrapUpList) {
+        for (line::MessageBoxWrapUp &ent: wrap_up_list.messageBoxWrapUpList) {
             if (ent.messageBox.midType != line::MIDType::ROOM)
                 continue;
 
@@ -280,10 +280,10 @@ void PurpleLine::get_rooms() {
     });
 }
 
-void PurpleLine::update_rooms(line::TMessageBoxWrapUpResponse wrap_up_list) {
+void PurpleLine::update_rooms(line::MessageBoxWrapUpList wrap_up_list) {
     std::set<PurpleChat *> chats_to_delete = blist_find_chats_by_type(ChatType::ROOM);
 
-    for (line::TMessageBoxWrapUp &ent: wrap_up_list.messageBoxWrapUpList) {
+    for (line::MessageBoxWrapUp &ent: wrap_up_list.messageBoxWrapUpList) {
         if (ent.messageBox.midType != line::MIDType::ROOM)
             continue;
 

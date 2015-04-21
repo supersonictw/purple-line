@@ -11,7 +11,7 @@ PURPLE_DATA_ROOT_DIR:=$(shell pkg-config --variable=datarootdir purple)
 
 MAIN = libline.so
 
-GEN_SRCS = thrift_line/line_main_constants.cpp thrift_line/line_main_types.cpp \
+GEN_SRCS = thrift_line/line_constants.cpp thrift_line/line_types.cpp \
 	thrift_line/TalkService.cpp
 REAL_SRCS = pluginmain.cpp linehttptransport.cpp thriftclient.cpp httpclient.cpp \
 	purpleline.cpp purpleline_login.cpp purpleline_blist.cpp purpleline_chats.cpp \
@@ -29,9 +29,9 @@ $(MAIN): $(OBJS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -std=c++11 -c $< -o $@
 
-thrift_line: line_main.thrift
+thrift_line: line.thrift
 	mkdir -p thrift_line
-	$(THRIFT) --gen cpp -out thrift_line line_main.thrift
+	$(THRIFT) --gen cpp -out thrift_line line.thrift
 
 .PHONY: clean
 clean:

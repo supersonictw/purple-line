@@ -28,8 +28,6 @@ Make sure you have the required prerequisites:
 * libpurple - probably available from your package manager
 * Apache Thrift compiler and C++ library - v0.9.1 should be stable. The Git version and OS packages
   are sometimes a bit iffy. Compiling by hand is your best bet.
-* line_main.thrift - not included, must be placed in the project root directory. For the time being,
-  you can acquire this file from the documentation at http://altrepo.eu/
 
 To install the plugin system-wide, run:
 

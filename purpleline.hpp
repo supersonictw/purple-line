@@ -173,7 +173,7 @@ private:
     void get_contacts();
     void get_groups();
     void get_rooms();
-    void update_rooms(line::TMessageBoxWrapUpResponse wrap_up_list);
+    void update_rooms(line::MessageBoxWrapUpList wrap_up_list);
     void get_group_invites();
 
     void login_done();
