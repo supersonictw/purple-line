@@ -3,7 +3,7 @@
 purple-line
 ===========
 
-libpurple (Pidgin, Finch) protocol plugin for LINE (http://line.me/) by Naver / LINE Corporation.
+libpurple (Pidgin, Finch) protocol plugin for LINE (http://line.me/).
 
 Where are the binaries and packages?
 ------------------------------------
@@ -12,13 +12,7 @@ I am not looking into "easy to install" options before I'm satisfied with the st
 not have people who cannot figure out how to compile software by themselves be disappointed by an
 unstable plugin.
 
-Does it work?
--------------
-
-Yes, to an extent. Here's Pidgin logged in to LINE, but it's not quite stable and featureful enough
-to be used as one's main LINE client yet.
-
-![Screenshot](http://virkkunen.net/b/pidgin-line2.png)
+![Screenshot](.imgur.com/By1yLXB.png)
 
 How to install
 --------------
