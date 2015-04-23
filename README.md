@@ -1,9 +1,11 @@
-**Warning: Unfinished software!** This plugin is still under development and many things are still unstable or unimplemented.
-
 purple-line
 ===========
 
-libpurple (Pidgin, Finch) protocol plugin for LINE (http://line.me/).
+libpurple (Pidgin, Finch) protocol plugin for [LINE](http://line.me/).
+
+**Warning: Unfinished software! This plugin is still under development and many things are still unstable or unimplemented.**
+
+![Screenshot](http://i.imgur.com/By1yLXB.png)
 
 Where are the binaries and packages?
 ------------------------------------
@@ -11,8 +13,6 @@ Where are the binaries and packages?
 I am not looking into "easy to install" options before I'm satisfied with the stability. I'd rather
 not have people who cannot figure out how to compile software by themselves be disappointed by an
 unstable plugin.
-
-![Screenshot](http://i.imgur.com/By1yLXB.png)
 
 How to install
 --------------
