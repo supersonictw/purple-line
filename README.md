@@ -12,7 +12,7 @@ I am not looking into "easy to install" options before I'm satisfied with the st
 not have people who cannot figure out how to compile software by themselves be disappointed by an
 unstable plugin.
 
-![Screenshot](.imgur.com/By1yLXB.png)
+![Screenshot](http://i.imgur.com/By1yLXB.png)
 
 How to install
 --------------
