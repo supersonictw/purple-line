@@ -44,6 +44,12 @@ enum class ChatType {
     GROUP_INVITE = 3,
 };
 
+std::string markup_escape(std::string const &text);
+
+std::string markup_unescape(std::string const &markup);
+
+std::string url_encode(std::string const &str);
+
 class PurpleLine {
 
     struct Attachment {
@@ -118,13 +124,6 @@ public:
 
 private:
 
-    static std::string markup_escape(std::string const &text);
-    static std::string markup_unescape(std::string const &markup);
-    static std::string url_encode(std::string const &str);
-
-    static std::string get_sticker_id(line::Message &msg);
-    static std::string get_sticker_url(line::Message &msg, bool thumb = false);
-
     void connect_signals();
     void disconnect_signals();
 
@@ -134,9 +133,9 @@ private:
         line::ContentType::type type, std::string id);
     Attachment *conv_attachment_get(PurpleConversation *conv, std::string token);
 
-    void handle_message(line::Message &msg, bool replay);
-    void write_message(PurpleConversation *conv, line::Message &msg,
-        time_t mtime, int flags, std::string text);
+    void write_message(line::Message &msg, bool replay);
+    void write_message(PurpleConversation *conv, std::string &from, std::string &text,
+        time_t mtime, int flags);
 
     std::string get_room_display_name(line::Room &room);
     void set_chat_participants(PurpleConvChat *chat, line::Room &room);

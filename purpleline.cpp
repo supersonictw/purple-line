@@ -20,7 +20,7 @@
 #include "purpleline.hpp"
 #include "wrapper.hpp"
 
-std::string PurpleLine::markup_escape(std::string const &text) {
+std::string markup_escape(std::string const &text) {
     gchar *escaped = purple_markup_escape_text(text.c_str(), text.size());
     std::string result(escaped);
     g_free(escaped);
@@ -28,7 +28,7 @@ std::string PurpleLine::markup_escape(std::string const &text) {
     return result;
 }
 
-std::string PurpleLine::markup_unescape(std::string const &markup) {
+std::string markup_unescape(std::string const &markup) {
     gchar *unescaped = purple_unescape_html(markup.c_str());
     std::string result(unescaped);
     g_free(unescaped);
@@ -36,52 +36,8 @@ std::string PurpleLine::markup_unescape(std::string const &markup) {
     return result;
 }
 
-std::string PurpleLine::url_encode(std::string const &str) {
+std::string url_encode(std::string const &str) {
     return purple_url_encode(str.c_str());
-}
-
-std::string PurpleLine::get_sticker_id(line::Message &msg) {
-    std::map<std::string, std::string> &meta = msg.contentMetadata;
-
-    if (meta.count("STKID") == 0 || meta.count("STKVER") == 0 || meta.count("STKPKGID") == 0)
-        return "";
-
-    std::stringstream id;
-
-    id << "[LINE sticker "
-        << meta["STKVER"] << "/"
-        << meta["STKPKGID"] << "/"
-        << meta["STKID"];
-
-    if (meta.count("STKTXT") == 1)
-        id << " " << meta["STKTXT"];
-
-    id << "]";
-
-    return id.str();
-}
-
-std::string PurpleLine::get_sticker_url(line::Message &msg, bool thumb) {
-    std::map<std::string, std::string> &meta = msg.contentMetadata;
-
-    int ver;
-    std::stringstream ss(meta["STKVER"]);
-    ss >> ver;
-
-    std::stringstream url;
-
-    url << LINE_STICKER_URL
-        << (ver / 1000000) << "/" << (ver / 1000) << "/" << (ver % 1000) << "/"
-        << meta["STKPKGID"] << "/"
-        << "PC/stickers/"
-        << meta["STKID"];
-
-    if (thumb)
-        url << "_key";
-
-    url << ".png";
-
-    return url.str();
 }
 
 PurpleLine::PurpleLine(PurpleConnection *conn, PurpleAccount *acct) :
@@ -99,39 +55,6 @@ PurpleLine::PurpleLine(PurpleConnection *conn, PurpleAccount *acct) :
 
 PurpleLine::~PurpleLine() {
     c_out->close();
-}
-
-void PurpleLine::register_commands() {
-    purple_cmd_register(
-        "sticker",
-        "w",
-        PURPLE_CMD_P_PRPL,
-        (PurpleCmdFlag)(PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT),
-        LINE_PRPL_ID,
-        WRAPPER(PurpleLine::cmd_sticker),
-        "Sends a sticker. The argument should be of the format VER/PKGID/ID.",
-        nullptr);
-
-    purple_cmd_register(
-        "history",
-        "w",
-        PURPLE_CMD_P_PRPL,
-        (PurpleCmdFlag)
-            (PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT | PURPLE_CMD_FLAG_ALLOW_WRONG_ARGS),
-        LINE_PRPL_ID,
-        WRAPPER(PurpleLine::cmd_history),
-        "Shows more chat history. Optional argument specifies number of messages to show.",
-        nullptr);
-
-    purple_cmd_register(
-        "open",
-        "w",
-        PURPLE_CMD_P_PRPL,
-        (PurpleCmdFlag)(PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT),
-        LINE_PRPL_ID,
-        WRAPPER(PurpleLine::cmd_open),
-        "Opens an attachment (image, audio) by number.",
-        nullptr);
 }
 
 const char *PurpleLine::list_icon(PurpleAccount *, PurpleBuddy *) {
@@ -323,260 +246,6 @@ PurpleLine::Attachment *PurpleLine::conv_attachment_get(PurpleConversation *conv
     auto atts = (std::vector<Attachment> *)purple_conversation_get_data(conv, "line-attachments");
 
     return (atts && index <= (int)atts->size()) ? &(*atts)[index - 1] : nullptr;
-}
-
-void PurpleLine::handle_message(line::Message &msg, bool replay) {
-    std::string text;
-    int flags = 0;
-    time_t mtime = (time_t)(msg.createdTime / 1000);
-
-    bool sent = (msg.from == profile.mid);
-
-    if (std::find(recent_messages.cbegin(), recent_messages.cend(), msg.id)
-        != recent_messages.cend())
-    {
-        // We already processed this message. User is probably talking with himself.
-        return;
-    }
-
-    // Hack
-    if (msg.from == msg.to)
-        push_recent_message(msg.id);
-
-    PurpleConversation *conv = purple_find_conversation_with_account(
-        (msg.toType == line::MIDType::USER ? PURPLE_CONV_TYPE_IM : PURPLE_CONV_TYPE_CHAT),
-        ((!sent && msg.toType == line::MIDType::USER) ? msg.from.c_str() : msg.to.c_str()),
-        acct);
-
-    // If this is a new received IM, create the conversation if it doesn't exist
-    if (!conv && !sent && msg.toType == line::MIDType::USER)
-        conv = purple_conversation_new(PURPLE_CONV_TYPE_IM, acct, msg.from.c_str());
-
-    // If this is a new conversation, we're not replaying history and history hasn't been fetched
-    // yet, queue the message instead of showing it.
-    if (conv && !replay) {
-        auto *queue = (std::vector<line::Message> *)
-            purple_conversation_get_data(conv, "line-message-queue");
-
-        if (queue) {
-            queue->push_back(msg);
-            return;
-        }
-    }
-
-    // Replaying messages from history
-    // Unfortunately Pidgin displays messages with this flag with odd formatting and no username.
-    // Disable for now.
-    //if (replay)
-    //    flags |= PURPLE_MESSAGE_NO_LOG;
-
-    switch (msg.contentType) {
-        case line::ContentType::NONE: // actually text
-        case line::ContentType::LOCATION:
-            if (msg.__isset.location) {
-                line::Location &loc = msg.location;
-
-                text = markup_escape(loc.title)
-                    + " | <a href=\"https://maps.google.com/?q=" + url_encode(loc.address)
-                    + "&ll=" + std::to_string(loc.latitude)
-                    + "," + std::to_string(loc.longitude)
-                    + "\">"
-                    + (loc.address.size()
-                        ? markup_escape(loc.address)
-                        : "(no address)")
-                    + "</a>";
-            } else {
-                text = markup_escape(msg.text);
-            }
-            break;
-
-        case line::ContentType::STICKER:
-            {
-                std::string id = get_sticker_id(msg);
-
-                if (id == "")  {
-                    text = "<em>[Broken sticker]</em>";
-
-                    purple_debug_warning("line", "Got a broken sticker.\n");
-                } else {
-                    text = id;
-
-                    if (conv
-                        && purple_conv_custom_smiley_add(conv, id.c_str(), "id", id.c_str(), TRUE))
-                    {
-                        http.request(get_sticker_url(msg),
-                            [this, id, conv](int status, const guchar *data, gsize len)
-                            {
-                                if (status == 200 && data && len > 0) {
-                                    purple_conv_custom_smiley_write(
-                                        conv,
-                                        id.c_str(),
-                                        data,
-                                        len);
-                                } else {
-                                    purple_debug_warning(
-                                        "line",
-                                        "Couldn't download sticker. Status: %d\n",
-                                        status);
-                                }
-
-                                purple_conv_custom_smiley_close(conv, id.c_str());
-                            });
-                    }
-                }
-            }
-            break;
-
-        case line::ContentType::IMAGE:
-        case line::ContentType::VIDEO: // Videos could really benefit from streaming...
-            {
-                std::string type_std = line::_ContentType_VALUES_TO_NAMES.at(msg.contentType);
-
-                std::string id = "[LINE " + type_std + " " + msg.id + "]";
-
-                text = id;
-
-                if (conv) {
-                    text += " <font color=\"#888888\">/open "
-                        + conv_attachment_add(conv, msg.contentType, msg.id)
-                        + "</font>";
-                }
-
-                if (!conv
-                    || !purple_conv_custom_smiley_add(conv, id.c_str(), "id", id.c_str(), TRUE))
-                {
-                    break;
-                }
-
-                if (msg.contentPreview.size() > 0) {
-                    purple_conv_custom_smiley_write(
-                        conv,
-                        id.c_str(),
-                        (const guchar *)msg.contentPreview.c_str(),
-                        msg.contentPreview.size());
-
-                    purple_conv_custom_smiley_close(conv, id.c_str());
-                } else {
-                    std::string preview_url = msg.contentMetadata.count("PREVIEW_URL")
-                        ? msg.contentMetadata["PREVIEW_URL"]
-                        : std::string(LINE_OS_URL) + "os/m/" + msg.id + "/preview";
-
-                    http.request(preview_url, HTTPFlag::AUTH | HTTPFlag::LARGE,
-                        [this, id, conv](int status, const guchar *data, gsize len)
-                        {
-                            if (status == 200 && data && len > 0) {
-                                purple_conv_custom_smiley_write(
-                                    conv,
-                                    id.c_str(),
-                                    data,
-                                    len);
-                            } else {
-                                purple_debug_warning(
-                                    "line",
-                                    "Couldn't download image message. Status: %d\n",
-                                    status);
-                            }
-
-                            purple_conv_custom_smiley_close(conv, id.c_str());
-                        });
-                }
-            }
-            break;
-
-        case line::ContentType::AUDIO:
-            {
-                text = "[Audio message";
-
-                if (msg.contentMetadata.count("AUDLEN")) {
-                    int len = 0;
-
-                    try {
-                        len = std::stoi(msg.contentMetadata["AUDLEN"]);
-                    } catch(...) { /* ignore */ }
-
-                    if (len > 0) {
-                        text += " "
-                            + std::to_string(len / 1000)
-                            + "."
-                            + std::to_string((len % 1000) / 100)
-                            + "s";
-                    }
-                }
-
-                text += "]";
-
-                if (conv) {
-                    text += " <font color=\"#888888\">/open "
-                        + conv_attachment_add(conv, msg.contentType, msg.id)
-                        + "</font>";
-                }
-            }
-            break;
-
-        // TODO: other content types
-
-        default:
-            text = "<em>[Not implemented: ";
-            text += line::_ContentType_VALUES_TO_NAMES.at(msg.contentType);
-            text += " message]</em>";
-            break;
-    }
-
-    if (sent) {
-        // Messages sent by user (sync from other devices)
-
-        write_message(conv, msg, mtime, flags | PURPLE_MESSAGE_SEND, text);
-    } else {
-        // Messages received from other users
-
-        flags |= PURPLE_MESSAGE_RECV;
-
-        if (replay) {
-            // Write replayed messages instead of serv_got_* to avoid Pidgin's IM sound
-
-            write_message(conv, msg, mtime, flags, text);
-        } else {
-            if (msg.toType == line::MIDType::USER) {
-                serv_got_im(
-                    conn,
-                    msg.from.c_str(),
-                    text.c_str(),
-                    (PurpleMessageFlags)flags,
-                    mtime);
-            } else if (msg.toType == line::MIDType::GROUP || msg.toType == line::MIDType::ROOM) {
-                serv_got_chat_in(
-                    conn,
-                    purple_conv_chat_get_id(PURPLE_CONV_CHAT(conv)),
-                    msg.from.c_str(),
-                    (PurpleMessageFlags)flags,
-                    text.c_str(),
-                    mtime);
-            }
-        }
-    }
-}
-
-void PurpleLine::write_message(PurpleConversation *conv, line::Message &msg,
-    time_t mtime, int flags, std::string text)
-{
-    if (!conv)
-        return;
-
-    if (msg.toType == line::MIDType::USER) {
-        purple_conv_im_write(
-            PURPLE_CONV_IM(conv),
-            msg.from.c_str(),
-            text.c_str(),
-            (PurpleMessageFlags)flags,
-            mtime);
-    } else if (msg.toType == line::MIDType::GROUP || msg.toType == line::MIDType::ROOM) {
-        purple_conv_chat_write(
-            PURPLE_CONV_CHAT(conv),
-            msg.from.c_str(),
-            text.c_str(),
-            (PurpleMessageFlags)flags,
-            mtime);
-    }
 }
 
 line::Contact &PurpleLine::get_up_to_date_contact(line::Contact &c) {
@@ -900,7 +569,7 @@ void PurpleLine::fetch_conversation_history(PurpleConversation *conv, int count,
                 time(NULL));
 
             for (auto msgi = recent_msgs.rbegin(); msgi != recent_msgs.rend(); msgi++)
-                handle_message(*msgi, true);
+                write_message(*msgi, true);
 
             purple_conversation_write(
                 conv,
@@ -924,7 +593,7 @@ void PurpleLine::fetch_conversation_history(PurpleConversation *conv, int count,
         // If there's a message queue, play it back now
         if (queue) {
             for (line::Message &msg: *queue)
-                handle_message(msg, false);
+                write_message(msg, false);
 
             delete queue;
         }
@@ -960,147 +629,6 @@ void PurpleLine::signal_deleting_conversation(PurpleConversation *conv) {
         purple_conversation_set_data(conv, "line-attachments", nullptr);
         delete atts;
     }
-}
-
-static const char *sticker_fields[] = { "STKVER", "STKPKGID", "STKID" };
-
-PurpleCmdRet PurpleLine::cmd_sticker(PurpleConversation *conv,
-    const gchar *, gchar **args, gchar **error, void *)
-{
-    line::Message msg;
-
-    std::stringstream ss(args[0]);
-    std::string item;
-
-    int part = 0;
-    while (std::getline(ss, item, '/')) {
-        if (part == 3) {
-            *error = g_strdup("Invalid sticker.");
-            return PURPLE_CMD_RET_FAILED;
-        }
-
-        msg.contentMetadata[sticker_fields[part]] = item;
-
-        part++;
-    }
-
-    if (part != 3) {
-        *error = g_strdup("Invalid sticker.");
-        return PURPLE_CMD_RET_FAILED;
-    }
-
-    msg.contentType = line::ContentType::STICKER;
-    msg.from = profile.mid;
-    msg.to = purple_conversation_get_name(conv);
-
-    handle_message(msg, false);
-
-    send_message(msg);
-
-    return PURPLE_CMD_RET_OK;
-}
-
-PurpleCmdRet PurpleLine::cmd_history(PurpleConversation *conv,
-    const gchar *, gchar **args, gchar **error, void *)
-{
-    int count = 10;
-
-    if (args[0]) {
-        try {
-            count = std::stoi(args[0]);
-        } catch (...) {
-            *error = g_strdup("Invalid message count.");
-            return PURPLE_CMD_RET_FAILED;
-        }
-    }
-
-    fetch_conversation_history(conv, count, true);
-
-    return PURPLE_CMD_RET_OK;
-}
-
-static std::map<line::ContentType::type, std::string> attachment_extensions = {
-    { line::ContentType::IMAGE, ".jpg" },
-    { line::ContentType::VIDEO, ".mp4" },
-    { line::ContentType::AUDIO, ".mp3" },
-};
-
-PurpleCmdRet PurpleLine::cmd_open(PurpleConversation *conv,
-    const gchar *, gchar **args, gchar **error, void *)
-{
-    std::string token(args[0]);
-
-    Attachment *att = conv_attachment_get(conv, token);
-    if (!att) {
-        *error = g_strdup("No such attachment.");
-        return PURPLE_CMD_RET_FAILED;
-    }
-
-    if (att->path != "" && g_file_test(att->path.c_str(), G_FILE_TEST_EXISTS)) {
-        purple_notify_uri(conn, att->path.c_str());
-        return PURPLE_CMD_RET_OK;
-    }
-
-    // Ensure there's nothing funny about the id as we're going to use it as a path element
-    try {
-        std::stoll(att->id);
-    } catch (...) {
-        *error = g_strdup("Failed to download attachment.");
-        return PURPLE_CMD_RET_FAILED;
-    }
-
-    std::string ext = ".jpg";
-    if (attachment_extensions.count(att->type))
-        ext = attachment_extensions[att->type];
-
-    std::string dir = get_tmp_dir(true);
-
-    gchar *path_p = g_build_filename(
-        dir.c_str(),
-        (att->id + ext).c_str(),
-        nullptr);
-
-    std::string path(path_p);
-
-    g_free(path_p);
-
-    purple_conversation_write(
-        conv,
-        "",
-        "Downloading attachment...",
-        (PurpleMessageFlags)PURPLE_MESSAGE_SYSTEM,
-        time(NULL));
-
-    std::string url = std::string(LINE_OS_URL) + "os/m/"+ att->id;
-
-    PurpleConversationType ctype = purple_conversation_get_type(conv);
-    std::string cname = std::string(purple_conversation_get_name(conv));
-
-    http.request(url, HTTPFlag::AUTH | HTTPFlag::LARGE,
-        [this, path, token, ctype, cname]
-        (int status, const guchar *data, gsize len)
-        {
-            if (status == 200 && data && len > 0) {
-                g_file_set_contents(path.c_str(), (const char *)data, len, nullptr);
-
-                temp_files.push_back(path);
-
-                PurpleConversation *conv = purple_find_conversation_with_account(
-                    ctype, cname.c_str(), acct);
-
-                if (conv) {
-                    Attachment *att = conv_attachment_get(conv, token);
-                    if (att)
-                        att->path = path;
-                }
-
-                purple_notify_uri(conn, path.c_str());
-            } else {
-                notify_error("Failed to download attachment.");
-            }
-        });
-
-    return PURPLE_CMD_RET_OK;
 }
 
 void PurpleLine::notify_error(std::string msg) {

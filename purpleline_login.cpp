@@ -1,8 +1,6 @@
-#include <glib.h>
+#include "purpleline.hpp"
 
 #include <core.h>
-
-#include "purpleline.hpp"
 
 void PurpleLine::login_start() {
     purple_connection_set_state(conn, PURPLE_CONNECTING);
