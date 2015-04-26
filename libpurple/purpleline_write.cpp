@@ -244,7 +244,7 @@ void PurpleLine::write_message(line::Message &msg, bool replay) {
     if (sent) {
         // Messages sent by user (sync from other devices)
 
-        write_message(conv, msg.from, msg.text, mtime, flags | PURPLE_MESSAGE_SEND);
+        write_message(conv, msg.from, text, mtime, flags | PURPLE_MESSAGE_SEND);
     } else {
         // Messages received from other users
 
