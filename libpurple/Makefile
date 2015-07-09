@@ -51,10 +51,18 @@ user-uninstall:
 .PHONY: install
 install: all
 	install -D $(MAIN) $(DESTDIR)$(PURPLE_PLUGIN_DIR)/$(MAIN)
+	install -D line16.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/16/line.png
+	install -D line22.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/22/line.png
+	install -D line48.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/48/line.png
+	install -D line.svg $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/scalable/line.svg
 
 .PHONY: uninstall
 uninstall:
 	rm -f $(DESTDIR)$(PURPLE_PLUGIN_DIR)/$(MAIN)
+	rm -f $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/16/line.png
+	rm -f $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/22/line.png
+	rm -f $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/48/line.png
+	rm -f $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/scalable/line.svg
 
 depend: .depend
 
