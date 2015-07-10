@@ -235,9 +235,12 @@ void PurpleLine::write_message(line::Message &msg, bool replay) {
         // TODO: other content types
 
         default:
-            text = "<em>[Not implemented: ";
-            text += line::_ContentType_VALUES_TO_NAMES.at(msg.contentType);
-            text += " message]</em>";
+            text = "<em>[Unimplemented message type: ";
+            text += line::_ContentType_VALUES_TO_NAMES.count(msg.contentType)
+                ? line::_ContentType_VALUES_TO_NAMES.at(msg.contentType)
+                : "TYPE " + std::to_string(msg.contentType);
+            text += "]</em>";
+
             break;
     }
 
