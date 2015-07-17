@@ -234,8 +234,8 @@ std::set<T *> PurpleLine::blist_find(std::function<bool(T *)> predicate) {
         node;
         node = purple_blist_node_next(node, FALSE))
     {
-        if (_blist_node_type<T>::get_account((T *)node) == acct
-            && purple_blist_node_get_type(node) == _blist_node_type<T>::type
+        if (purple_blist_node_get_type(node) == _blist_node_type<T>::type
+            && _blist_node_type<T>::get_account((T *)node) == acct
             && predicate((T *)node))
         {
             results.insert((T *)node);
