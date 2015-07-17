@@ -99,26 +99,6 @@ void HTTPClient::execute_next() {
     }
 }
 
-void HTTPClient::parse_response(const char *res, int &status, const guchar *&body) {
-    // libpurple guarantees that responses are null terminated even if they're binary, so string
-    // functions are safe to use.
-
-    const char *status_end = strstr(res, "\r\n");
-    if (!status_end)
-        return;
-
-    const char *header_end = strstr(res, "\r\n\r\n");
-    if (!header_end)
-        return;
-
-    std::stringstream ss(std::string(res, status_end - res));
-    ss.ignore(255, ' ');
-
-    ss >> status;
-
-    body = (const guchar *)(header_end + 4);
-}
-
 void HTTPClient::complete(HTTPClient::Request *req,
     const gchar *url_text, gsize len, const gchar *error_message)
 {
@@ -126,14 +106,27 @@ void HTTPClient::complete(HTTPClient::Request *req,
         purple_debug_error("util", "HTTP error: %s\n", error_message);
         req->callback(-1, nullptr, 0);
     } else {
-        // HTTP/1.1 200 OK
-
-        int status;
+        int status = 0;
         const guchar *body = nullptr;
+        gsize body_len = 0;
 
-        parse_response(url_text, status, body);
+        // libpurple guarantees that responses are null terminated even if they're binary, so
+        // string functions are safe to use.
 
-        req->callback(status, body, len);
+        const char *status_end = strstr(url_text, "\r\n"),
+            *header_end = strstr(url_text, "\r\n\r\n");
+
+        if (status_end && header_end) {
+            std::stringstream ss(std::string(url_text, status_end - url_text));
+            ss.ignore(255, ' ');
+
+            ss >> status;
+
+            body = (const guchar *)(header_end + 4);
+            body_len = len - (header_end - url_text + 4);
+        }
+
+        req->callback(status, body, body_len);
     }
 
     request_queue.remove(req);

@@ -42,7 +42,6 @@ class HTTPClient {
     int in_flight;
 
     void execute_next();
-    void parse_response(const char *res, int &status, const guchar *&body);
     void complete(Request *req, const gchar *url_text, gsize len, const gchar *error_message);
 
     static void purple_cb(PurpleUtilFetchUrlData *url_data, gpointer user_data,
