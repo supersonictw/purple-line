@@ -80,10 +80,10 @@ user-uninstall:
 .PHONY: install
 install: all
 	install -D $(MAIN) $(DESTDIR)$(PURPLE_PLUGIN_DIR)/$(MAIN)
-	install -D ../icons/16/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/16/line.png
-	install -D ../icons/22/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/22/line.png
-	install -D ../icons/48/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/48/line.png
-	install -D ../icons/scalable/line.svg $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/scalable/line.svg
+	install -m 644 -D ../icons/16/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/16/line.png
+	install -m 644 -D ../icons/22/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/22/line.png
+	install -m 644 -D ../icons/48/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/48/line.png
+	install -m 644 -D ../icons/scalable/line.svg $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/scalable/line.svg
 
 .PHONY: uninstall
 uninstall:
