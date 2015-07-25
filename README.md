@@ -3,8 +3,6 @@ purple-line
 
 libpurple (Pidgin, Finch) protocol plugin for [LINE](http://line.me/).
 
-**Warning: Unfinished software! This plugin is still under development and many things are still unstable or unimplemented.**
-
 ![Screenshot](http://i.imgur.com/By1yLXB.png)
 
 Where are the binaries and packages?
@@ -19,21 +17,46 @@ How to install
 
 Make sure you have the required prerequisites:
 
-* libpurple - probably available from your package manager
-* Apache Thrift compiler and C++ library - v0.9.1 should be stable. The Git version and OS packages
-  are sometimes a bit iffy. Compiling by hand is your best bet.
+* libpurple - Library that provides the core functionality of Pidgin and other compatible clients.
+  Probably available from your package manager
+* thrift / libthrift - Apache Thrift compiler and C++ library. May be available from your package
+  manager.
 
 To install the plugin system-wide, run:
 
     make
     sudo make install
 
-You can also install the plugin for your user only by running:
+The makefile supports a flag THRIFT_STATIC=true which causes it to download and build a version of
+Thrift and statically link it. This should be convenient for people using one of the numerous
+distributions that do not package Thrift.
 
+You can also install the plugin for your user only by replacing `install` with `user-install`.
+
+How to install (Arch Linux)
+---------------------------
+
+Arch Linux packages all the required dependencies, so you can install the plugin by simply typing:
+
+    sudo pacman -S thrift libpurple
     make
-    make user-install
+    sudo make install
 
-Builds are only tested on Arch Linux and a recent Ubuntu for now.
+How to install (Ubuntu)
+-----------------------
+
+Ubuntu does not currently package Thrift so it must be obtained elsewhere, or statically linked. To
+build the plugin with a statically linked Thrift library, type:
+
+    sudo apt-get install \
+        libpurple-dev \
+        libboost-dev libboost-test-dev \
+        libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libevent-dev \
+        automake libtool flex bison pkg-config g++ libssl-dev
+    make THRIFT_STATIC=true
+    sudo make install THRIFT_STATIC=true
+
+The installed packages include all the suggested dependencies from Thrift's website.
 
 Implemented
 -----------
