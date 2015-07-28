@@ -1,4 +1,4 @@
-Source: pidgin-line
+Source: purple-line
 Section: contrib/net
 Priority: optional
 Maintainer: Matti Virkkunen <mvirkkunen@gmail.com>
@@ -7,7 +7,7 @@ Standards-Version: 3.9.6
 Homepage: http://altrepo.eu/git/purple-line/
 Vcs-Git: http://altrepo.eu/git/purple-line.git
 
-Package: pidgin-line
+Package: purple-line
 Architecture: any
 Depends: ${misc:Depends},${shlibs:Depends},
  libpurple0,libthrift0
@@ -15,14 +15,14 @@ Provides: purple-line
 Description: purple-line
  libpurple (Pidgin, Finch) protocol plugin for LINE.
  Now, this doesn't work well on Empathy.
- To know usage, you should read README.md in /usr/share/doc/pidgin-line.
+ To know usage, you should read README.md in /usr/share/doc/purple-line.
  .
 
-Package: pidgin-line-dbg
+Package: purple-line-dbg
 Section: contrib/debug
 Architecture: any
 Priority: extra
-Depends: ${misc:Depends}, pidgin-line (= ${binary:Version})
+Depends: ${misc:Depends}, purple-line (= ${binary:Version})
 Description: purple-line (debugging symbols)
  libpurple (Pidgin, Finch) protocol plugin for LINE.
  This package includes debug symbols.
