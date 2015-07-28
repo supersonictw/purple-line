@@ -1,0 +1,11 @@
+pidgin-line (0.1-ubuntu1) vivid; urgency=low
+
+    * Release for public.
+
+ -- Akira Nakagawa <matyapiro31@gmail.com>  Tue, 28 Jul 2015 13:42:00 +0900
+pidgin-line (0.0-ubuntu1) trusty; urgency=low
+
+    * Initial Release
+
+ -- Akira Nakagawa <matyapiro31@gmail.com>  Sat, 25 Jul 2015 21:31:57 +0900
+
