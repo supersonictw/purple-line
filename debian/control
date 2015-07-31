@@ -2,7 +2,7 @@ Source: purple-line
 Section: contrib/net
 Priority: optional
 Maintainer: Matti Virkkunen <mvirkkunen@gmail.com>
-Build-Depends: debhelper (>= 9),thrift-compiler,libpurple-dev,libthrift-dev,libglib2.0-dev,quilt
+Build-Depends: debhelper (>= 9),thrift-compiler,libpurple-dev,libthrift-dev,libglib2.0-dev,python,dh-python,quilt
 Standards-Version: 3.9.6
 Homepage: http://altrepo.eu/git/purple-line/
 Vcs-Git: http://altrepo.eu/git/purple-line.git
