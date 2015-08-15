@@ -6,12 +6,12 @@ ifdef THRIFT_STATIC
 	THRIFT_LIBS = -L$(THRIFT_STATIC_DIR)/lib/cpp/.libs -Wl,-Bstatic -lthrift -Wl,-Bdynamic
 	THRIFT_DEP = $(THRIFT)
 else
-	THRIFT = thrift
+	THRIFT ?= thrift
 	THRIFT_CXXFLAGS = `pkg-config --cflags thrift`
 	THRIFT_LIBS = `pkg-config --libs thrift`
 endif
 
-CXX = g++
+CXX ?= g++
 CXXFLAGS = -g -Wall -shared -fPIC \
 	-DHAVE_INTTYPES_H -DHAVE_CONFIG_H -DPURPLE_PLUGINS \
 	`pkg-config --cflags purple` $(THRIFT_CXXFLAGS)
