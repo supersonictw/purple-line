@@ -22,8 +22,3 @@ Index: purple-line/libpurple/Makefile
  	install -m 644 -D ../icons/16/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/16/line.png
  	install -m 644 -D ../icons/22/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/22/line.png
  	install -m 644 -D ../icons/48/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/48/line.png
-@@ -110,4 +110,3 @@ endif
- endif
- endif
- endif
--
