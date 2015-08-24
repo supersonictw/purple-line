@@ -17,6 +17,7 @@ override_dh_shlibdeps:
 #comment out command if you don't want to build clean every time.
 override_dh_auto_clean:
 	$(MAKE) clean
+	rm -rf libpurple/.depend
 	dh_clean
 
 override_dh_pysupport:
