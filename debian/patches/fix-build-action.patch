@@ -1,0 +1,24 @@
+add to /usr/lib/debug debug symboled file.
+remove strip.
+Index: purple-line/libpurple/Makefile
+===================================================================
+--- purple-line.orig/libpurple/Makefile
++++ purple-line/libpurple/Makefile
+@@ -38,7 +38,6 @@ all: $(MAIN)
+ 
+ $(MAIN): $(OBJS) $(THRIFT_DEP)
+ 	$(CXX) $(CXXFLAGS) -Wl,-z,defs -o $(MAIN) $(OBJS) $(LIBS)
+-	strip $(MAIN)
+ 
+ .cpp.o:
+ 	$(CXX) $(CXXFLAGS) -std=c++11 -c $< -o $@
+@@ -79,7 +78,8 @@ user-uninstall:
+ 
+ .PHONY: install
+ install: all
+-	install -D $(MAIN) $(DESTDIR)$(PURPLE_PLUGIN_DIR)/$(MAIN)
++	install -m 664 -D $(MAIN) $(DESTDIR)/usr/lib/debug$(PURPLE_PLUGIN_DIR)/$(MAIN)
++	install -m 664 -D $(MAIN) $(DESTDIR)$(PURPLE_PLUGIN_DIR)/$(MAIN)
+ 	install -m 644 -D ../icons/16/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/16/line.png
+ 	install -m 644 -D ../icons/22/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/22/line.png
+ 	install -m 644 -D ../icons/48/line.png $(DESTDIR)$(PURPLE_DATA_ROOT_DIR)/pixmaps/pidgin/protocols/48/line.png

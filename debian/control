@@ -1,0 +1,41 @@
+Source: purple-line
+Section: contrib/net
+Priority: optional
+Maintainer: Matti Virkkunen <mvirkkunen@gmail.com>
+Build-Depends: debhelper (>= 9),thrift-compiler,libpurple-dev,libthrift-dev,libglib2.0-dev,python,dh-python,quilt
+Standards-Version: 3.9.6
+Homepage: http://altrepo.eu/git/purple-line/
+Vcs-Git: http://altrepo.eu/git/purple-line.git
+
+Package: purple-line
+Architecture: any
+Depends: ${misc:Depends},${shlibs:Depends},
+ libpurple0,libthrift0
+Provides: purple-line
+Description: libpurple (Pidgin, Finch) protocol plugin for LINE
+ Supported Application:Pidgin Finch
+ Unsuppoted Application:Empathy
+ This plugin provides most features of LINE,
+ but some of them are not yet implemented now.
+ For example,buddy list configuration, account icon modification,
+ to get message is read or not,VoIP receiving/calling.
+ If you want to know more details of this plugin,
+ please visit http://altrepo.eu/git/purple-line/
+ .
+
+Package: purple-line-dbg
+Section: contrib/debug
+Architecture: any
+Priority: extra
+Depends: ${misc:Depends}, purple-line (= ${binary:Version})
+Description: libpurple (Pidgin, Finch) protocol plugin for LINE
+ Supported Application:Pidgin Finch
+ Unsuppoted Application:Empathy
+ This plugin provides most features of LINE,
+ but some of them are not yet implemented now.
+ For example,buddy list configuration, account icon modification,
+ to get message is read or not,VoIP receiving/calling.
+ If you want to know more details of this plugin,
+ please visit http://altrepo.eu/git/purple-line/
+ This package includes debug symbols.
+ .
