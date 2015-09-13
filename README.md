@@ -15,15 +15,22 @@ distribution.
 * http://debian.altrepo.eu/ (main)
 * http://debian.surlinter.net/ (mirror)
 
-For instructions for adding a custom repository on Ubuntu, see [the Ubuntu wiki](https://help.ubuntu.com/community/Repositories/Ubuntu).
+For instructions for adding a custom repository on Ubuntu, see
+[the Ubuntu wiki](https://help.ubuntu.com/community/Repositories/Ubuntu).
 
 For Debian, see [the Debian wiki](https://www.debian.org/releases/), or just add the following line
 to your `sources.list` file:
 
     deb http://debian.altrepo.eu/ stable main
 
-On either distribution, after adding the repository, run the following commands to install the
-plugin:
+In order to validate package signatures you need to add
+[this public key](http://debian.altrepo.eu/altrepo_eu.pub) to the APT key list. It can be done
+using the following command:
+
+    wget -qO - http://debian.altrepo.eu/altrepo_eu.pub | sudo apt-key add -
+
+On either distribution, after adding the repository and key, run the following commands to install
+the plugin:
 
     sudo apt-get update
     sudo apt-get install purple-line
