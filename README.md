@@ -5,22 +5,47 @@ libpurple (Pidgin, Finch) protocol plugin for [LINE](http://line.me/).
 
 ![Screenshot](http://i.imgur.com/By1yLXB.png)
 
-Where are the binaries and packages?
-------------------------------------
+Install via package manager (Ubuntu/Debian)
+-------------------------------------------
 
-I am not looking into "easy to install" options before I'm satisfied with the stability. I'd rather
-not have people who cannot figure out how to compile software by themselves be disappointed by an
-unstable plugin.
+An APT repository is available for installing the plugin. The repository contains the purple-line
+package itself, and the required Apache Thrift packages which are not properly packaged by either
+distribution.
 
-How to install
---------------
+* http://debian.altrepo.eu/ (main)
+* http://debian.surlinter.net/ (mirror)
 
-Make sure you have the required prerequisites:
+For instructions for adding a custom repository on Ubuntu, see [the Ubuntu wiki](https://help.ubuntu.com/community/Repositories/Ubuntu).
+
+For Debian, see [the Debian wiki](https://www.debian.org/releases/), or just add the following line
+to your `sources.list` file:
+
+    deb http://debian.altrepo.eu/ stable main
+
+On either distribution, after adding the repository, run the following commands to install the
+plugin:
+
+    sudo apt-get update
+    sudo apt-get install purple-line
+
+Install from source (Arch Linux)
+--------------------------------
+
+Arch Linux packages all the required dependencies, so you can install the plugin by simply typing:
+
+    sudo pacman -S thrift libpurple
+    make
+    sudo make install
+
+Install from source (any distribution)
+--------------------------------------
+
+Make sure you have the required prerequisites installed:
 
 * libpurple - Library that provides the core functionality of Pidgin and other compatible clients.
   Probably available from your package manager
-* thrift / libthrift - Apache Thrift compiler and C++ library. May be available from your package
-  manager.
+* thrift - Apache Thrift compiler. May be available from your package manager.
+* libthrift - Apache Thrift C++ library. May be available from your package manager.
 
 To install the plugin system-wide, run:
 
@@ -33,33 +58,8 @@ distributions that do not package Thrift.
 
 You can also install the plugin for your user only by replacing `install` with `user-install`.
 
-How to install (Arch Linux)
----------------------------
-
-Arch Linux packages all the required dependencies, so you can install the plugin by simply typing:
-
-    sudo pacman -S thrift libpurple
-    make
-    sudo make install
-
-How to install (Ubuntu)
------------------------
-
-Ubuntu does not currently package Thrift so it must be obtained elsewhere, or statically linked. To
-build the plugin with a statically linked Thrift library, type:
-
-    sudo apt-get install \
-        libpurple-dev \
-        libboost-dev libboost-test-dev \
-        libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libevent-dev \
-        automake libtool flex bison pkg-config g++ libssl-dev
-    make THRIFT_STATIC=true
-    sudo make install THRIFT_STATIC=true
-
-The installed packages include all the suggested dependencies from Thrift's website.
-
-Implemented
------------
+Features implemented
+--------------------
 
 * Logging in
   * Authentication
@@ -91,8 +91,8 @@ Implemented
  * Audio (send/receive)
  * Location (receive)
 
-To do
------
+Features not yet implemented
+----------------------------
 
 * Only fetch unseen messages, let a log plugin handle already seen messages
 * Implement timeouts for faster reconnections
