@@ -78,6 +78,8 @@ void PurpleLine::get_auth_token() {
         } catch (line::TalkException &err) {
             std::string msg = "Could not log in. " + err.reason;
 
+            conn->wants_to_die = TRUE;
+
             purple_connection_error(
                 conn,
                 msg.c_str());
