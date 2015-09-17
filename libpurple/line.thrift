@@ -248,6 +248,13 @@ struct Room {
     10: list<Contact> contacts;
 }
 
+struct RSAKey {
+    1: string keynm;
+    2: string nvalue;
+    3: string evalue;
+    4: string sessionKey;
+}
+
 exception TalkException {
     1: ErrorCode code;
     2: string reason;
@@ -297,6 +304,9 @@ service TalkService {
 
     Room getRoom(
         2: string roomId) throws(1: TalkException e);
+
+    RSAKey getRSAKeyInfo(
+        2: IdentityProvider provider) throws(1: TalkException e);
 
     LoginResult loginWithIdentityCredentialForCertificate(
         8: IdentityProvider identityProvider,

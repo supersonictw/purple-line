@@ -1,6 +1,31 @@
 #include "purpleline.hpp"
 
+#include <sstream>
+#include <iomanip>
+
 #include <core.h>
+
+#include <gcrypt.h>
+
+static std::string hex_to_bytes(std::string hex) {
+    if (hex.size() % 2 != 0)
+        hex = std::string("0") + hex;
+
+    std::string result(hex.size() / 2, '\0');
+    for (size_t i = 0; i < result.size(); i++)
+        result[i] = std::stoi(hex.substr(i * 2, 2), nullptr, 16);
+
+    return result;
+}
+
+static std::string bytes_to_hex(std::string bytes) {
+    std::ostringstream ss;
+
+    for (size_t i = 0; i < bytes.size(); i++)
+        ss << std::hex << std::setfill('0') << std::setw(2) << (unsigned)(bytes[i] & 0xff);
+
+    return ss.str();
+}
 
 void PurpleLine::login_start() {
     purple_connection_set_state(conn, PURPLE_CONNECTING);
@@ -51,35 +76,21 @@ void PurpleLine::login_start() {
 }
 
 void PurpleLine::get_auth_token() {
-    std::string certificate(purple_account_get_string(acct, LINE_ACCOUNT_CERTIFICATE, ""));
-
     purple_debug_info("line", "Logging in with credentials to get new auth token.\n");
 
-    std::string ui_name = "purple-line";
-
-    GHashTable *ui_info = purple_core_get_ui_info();
-    gpointer ui_name_p = g_hash_table_lookup(ui_info, "name");
-    if (ui_name_p)
-        ui_name = (char *)ui_name_p;
-
-    c_out->send_loginWithIdentityCredentialForCertificate(
-        line::IdentityProvider::LINE,
-        purple_account_get_username(acct),
-        purple_account_get_password(acct),
-        true,
-        "127.0.0.1",
-        ui_name,
-        certificate);
+    c_out->send_getRSAKeyInfo(line::IdentityProvider::LINE);
     c_out->send([this]() {
-        line::LoginResult result;
+        line::RSAKey key;
+        std::string credentials;
 
         try {
-            c_out->recv_loginWithIdentityCredentialForCertificate(result);
-        } catch (line::TalkException &err) {
-            std::string msg = "Could not log in. " + err.reason;
+            c_out->recv_getRSAKeyInfo(key);
+
+            credentials = get_encrypted_credentials(key);
+        } catch (std::exception &ex) {
+            std::string msg = std::string("Could not log in. ") + ex.what();
 
             conn->wants_to_die = TRUE;
-
             purple_connection_error(
                 conn,
                 msg.c_str());
@@ -87,40 +98,158 @@ void PurpleLine::get_auth_token() {
             return;
         }
 
-        if (result.type == line::LoginResultType::SUCCESS && result.authToken != "")
-        {
-            set_auth_token(result.authToken);
+        std::string certificate(purple_account_get_string(acct, LINE_ACCOUNT_CERTIFICATE, ""));
 
-            get_last_op_revision();
-        }
-        else if (result.type == line::LoginResultType::REQUIRE_DEVICE_CONFIRM)
-        {
-            purple_debug_info("line", "Starting PIN verification.\n");
+        std::string ui_name = "purple-line";
 
-            pin_verifier.verify(result, [this](std::string auth_token, std::string certificate) {
-                if (certificate != "") {
-                    purple_account_set_string(
-                        acct,
-                        LINE_ACCOUNT_CERTIFICATE,
-                        certificate.c_str());
-                }
+        GHashTable *ui_info = purple_core_get_ui_info();
+        gpointer ui_name_p = g_hash_table_lookup(ui_info, "name");
+        if (ui_name_p)
+            ui_name = (char *)ui_name_p;
 
-                set_auth_token(auth_token);
+        c_out->send_loginWithIdentityCredentialForCertificate(
+            line::IdentityProvider::LINE,
+            key.keynm,
+            credentials,
+            true,
+            "127.0.0.1",
+            ui_name,
+            certificate);
+        c_out->send([this]() {
+            line::LoginResult result;
+
+            try {
+                c_out->recv_loginWithIdentityCredentialForCertificate(result);
+            } catch (line::TalkException &err) {
+                std::string msg = "Could not log in. " + err.reason;
+
+                conn->wants_to_die = TRUE;
+                purple_connection_error(
+                    conn,
+                    msg.c_str());
+
+                return;
+            }
+
+            if (result.type == line::LoginResultType::SUCCESS && result.authToken != "")
+            {
+                set_auth_token(result.authToken);
 
                 get_last_op_revision();
-            });
-        }
-        else
-        {
-            std::stringstream ss("Could not log in. Bad LoginResult type: ");
-            ss << result.type;
-            std::string msg = ss.str();
+            }
+            else if (result.type == line::LoginResultType::REQUIRE_DEVICE_CONFIRM)
+            {
+                purple_debug_info("line", "Starting PIN verification.\n");
 
-            purple_connection_error(
-                conn,
-                msg.c_str());
-        }
+                pin_verifier.verify(result, [this](std::string auth_token, std::string certificate) {
+                    if (certificate != "") {
+                        purple_account_set_string(
+                            acct,
+                            LINE_ACCOUNT_CERTIFICATE,
+                            certificate.c_str());
+                    }
+
+                    set_auth_token(auth_token);
+
+                    get_last_op_revision();
+                });
+            }
+            else
+            {
+                std::stringstream ss("Could not log in. Bad LoginResult type: ");
+                ss << result.type;
+                std::string msg = ss.str();
+
+                purple_connection_error(
+                    conn,
+                    msg.c_str());
+            }
+        });
     });
+}
+
+// This may throw.
+std::string PurpleLine::get_encrypted_credentials(line::RSAKey &key) {
+    if (!gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P)) {
+        if (!gcry_check_version(GCRYPT_VERSION))
+            throw new std::runtime_error("libgcrypt version mismatch.");
+
+        gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
+
+        gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
+    }
+
+    std::string username = purple_account_get_username(acct);
+    std::string password = purple_account_get_password(acct);
+
+    if (username.size() > 255)
+        throw std::runtime_error("Username is too long.");
+
+    if (password.size() > 255)
+        throw std::runtime_error("Password is too long.");
+
+    std::ostringstream buf;
+
+    buf << (char)key.sessionKey.size() << key.sessionKey;
+    buf << (char)username.size() << username;
+    buf << (char)password.size() << password;
+
+    std::string modulus = hex_to_bytes(key.nvalue);
+    std::string exponent = hex_to_bytes(key.evalue);
+
+    std::string credentials = buf.str();
+
+    gpg_error_t err;
+
+    gcry_sexp_t public_key, plaintext, ciphertext, result;
+
+    err = gcry_sexp_build(
+        &public_key, nullptr,
+        "(public-key (rsa (n %b) (e %b)))",
+        (int)modulus.size(), modulus.c_str(),
+        (int)exponent.size(), exponent.c_str());
+
+    if (err)
+        throw std::runtime_error(std::string("ligbcrypt public key error: ") + gpg_strerror(err));
+
+    err = gcry_sexp_build(
+        &plaintext, nullptr,
+        "(data (flags pkcs1) (value %b))",
+        (int)credentials.size(), credentials.c_str());
+
+    if (err) {
+        gcry_sexp_release(public_key);
+        throw std::runtime_error(std::string("ligbcrypt data error: ") + gpg_strerror(err));
+    }
+
+    err = gcry_pk_encrypt(&ciphertext, plaintext, public_key);
+
+    gcry_sexp_release(plaintext);
+    gcry_sexp_release(public_key);
+
+    if (err)
+        throw std::runtime_error(std::string("libgcrypt encryption error: ") + gpg_strerror(err));
+
+    result = gcry_sexp_find_token(ciphertext, "a", 0);
+
+    gcry_sexp_release(ciphertext);
+
+    if (!result)
+        throw std::runtime_error("libgcrypt result token not found");
+
+    size_t result_data_len;
+    const char *result_data = gcry_sexp_nth_data(result, 1, &result_data_len);
+
+    if (!result_data) {
+        gcry_sexp_release(result);
+        throw std::runtime_error("libgcrypt result token value not found");
+    }
+
+    std::string result_bytes(result_data, result_data_len);
+
+    gcry_sexp_release(result);
+
+    return bytes_to_hex(result_bytes);
 }
 
 void PurpleLine::set_auth_token(std::string auth_token) {

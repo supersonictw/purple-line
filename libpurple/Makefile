@@ -14,9 +14,9 @@ endif
 CXX ?= g++
 CXXFLAGS = -g -Wall -shared -fPIC \
 	-DHAVE_INTTYPES_H -DHAVE_CONFIG_H -DPURPLE_PLUGINS \
-	`pkg-config --cflags purple` $(THRIFT_CXXFLAGS)
+	`pkg-config --cflags purple` `libgcrypt-config --cflags` $(THRIFT_CXXFLAGS)
 
-LIBS = `pkg-config --libs purple` $(THRIFT_LIBS)
+LIBS = `pkg-config --libs purple` `libgcrypt-config --libs` $(THRIFT_LIBS)
 
 PURPLE_PLUGIN_DIR:=$(shell pkg-config --variable=plugindir purple)
 PURPLE_DATA_ROOT_DIR:=$(shell pkg-config --variable=datarootdir purple)

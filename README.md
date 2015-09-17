@@ -40,7 +40,7 @@ Install from source (Arch Linux)
 
 Arch Linux packages all the required dependencies, so you can install the plugin by simply typing:
 
-    sudo pacman -S thrift libpurple
+    sudo pacman -S thrift libpurple libgcrypt
     make
     sudo make install
 
@@ -50,9 +50,10 @@ Install from source (any distribution)
 Make sure you have the required prerequisites installed:
 
 * libpurple - Library that provides the core functionality of Pidgin and other compatible clients.
-  Probably available from your package manager
+  Probably available from your package manager.
 * thrift - Apache Thrift compiler. May be available from your package manager.
 * libthrift - Apache Thrift C++ library. May be available from your package manager.
+* libgcrypt - Crypto library. Probably available from your package manager.
 
 To install the plugin system-wide, run:
 
