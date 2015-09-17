@@ -1,3 +1,8 @@
+purple-line (0.1-ubuntu2) vivid; urgency=low
+
+    * Support new LINE login.
+
+ -- Akira Nakagawa <matyapiro31@gmail.com>  Thu, 17 Sep 2015 21:04:00 +0900
 purple-line (0.1-ubuntu1) vivid; urgency=low
 
     * Release for public.

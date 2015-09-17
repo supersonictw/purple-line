@@ -2,7 +2,7 @@ Source: purple-line
 Section: contrib/net
 Priority: optional
 Maintainer: Matti Virkkunen <mvirkkunen@gmail.com>
-Build-Depends: debhelper (>= 9),thrift-compiler,libpurple-dev,libthrift-dev,libglib2.0-dev,python,dh-python,quilt
+Build-Depends: debhelper (>= 9),thrift-compiler,libpurple-dev,libthrift-dev,libgcrypt11-dev,libgpg-error-dev,libglib2.0-dev,python,dh-python,quilt
 Standards-Version: 3.9.6
 Homepage: http://altrepo.eu/git/purple-line/
 Vcs-Git: http://altrepo.eu/git/purple-line.git
@@ -10,7 +10,7 @@ Vcs-Git: http://altrepo.eu/git/purple-line.git
 Package: purple-line
 Architecture: any
 Depends: ${misc:Depends},${shlibs:Depends},
- libpurple0,libthrift0
+ libpurple0,libthrift0,libgcrypt11,libgpg-error
 Provides: purple-line
 Description: libpurple (Pidgin, Finch) protocol plugin for LINE
  Supported Application:Pidgin Finch
