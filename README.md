@@ -40,9 +40,9 @@ Install from source (Arch Linux)
 
 Arch Linux packages all the required dependencies, so you can install the plugin by simply typing:
 
-    sudo pacman -S thrift libpurple libgcrypt
-    make
-    sudo make install
+    sudo packman -S base-devel
+    curl -O http://altrepo.eu/git/arch.altrepo.eu/raw/master/purple-line/PKGBUILD
+    makepkg -s -i -c
 
 Install from source (any distribution)
 --------------------------------------
