@@ -38,9 +38,10 @@ the plugin:
 Install from source (Arch Linux)
 --------------------------------
 
-Arch Linux packages all the required dependencies, so you can install the plugin by simply typing:
+Arch Linux packages all the required dependencies and there's a PKGBUILD available (not yet in AUR).
+You can install the plugin by simply typing:
 
-    sudo packman -S base-devel
+    sudo pacman -S base-devel
     curl -O http://altrepo.eu/git/arch.altrepo.eu/raw/master/purple-line/PKGBUILD
     makepkg -s -i -c
 
