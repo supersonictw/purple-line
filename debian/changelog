@@ -1,4 +1,4 @@
-purple-line (0.1-ubuntu2) vivid; urgency=low
+purple-line (0.1.1-ubuntu2) vivid; urgency=low
 
     * Support new LINE login.
 

@@ -10,7 +10,7 @@ Vcs-Git: http://altrepo.eu/git/purple-line.git
 Package: purple-line
 Architecture: any
 Depends: ${misc:Depends},${shlibs:Depends},
- libpurple0,libthrift0,libgcrypt11,libgpg-error
+ libpurple0,libthrift0,libgcrypt11,libgpg-error0
 Provides: purple-line
 Description: libpurple (Pidgin, Finch) protocol plugin for LINE
  Supported Application:Pidgin Finch
