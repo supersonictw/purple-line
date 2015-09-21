@@ -8,7 +8,7 @@ Index: purple-line/libpurple/pluginmain.cpp
      i.id = (char *)LINE_PRPL_ID;
      i.name = (char *)"LINE";
 -    i.version = (char *)"0.1";
-+    i.version = (char *)"0.1-ubuntu1";
++    i.version = (char *)"0.1.1-ubuntu2";
      i.summary = (char *)"Plugin for Naver LINE";
      i.description = (char *)"Plugin for Naver LINE";
      i.author = (char *)"Matti Virkkunen <mvirkkunen@gmail.com>";
