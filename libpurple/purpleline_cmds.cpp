@@ -5,7 +5,7 @@ void PurpleLine::register_commands() {
         "sticker",
         "w",
         PURPLE_CMD_P_PRPL,
-        (PurpleCmdFlag)(PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT),
+        (PurpleCmdFlag)(PURPLE_CMD_FLAG_PRPL_ONLY | PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT),
         LINE_PRPL_ID,
         WRAPPER(PurpleLine::cmd_sticker),
         "Sends a sticker. The argument should be of the format VER/PKGID/ID.",
@@ -15,8 +15,8 @@ void PurpleLine::register_commands() {
         "history",
         "w",
         PURPLE_CMD_P_PRPL,
-        (PurpleCmdFlag)
-            (PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT | PURPLE_CMD_FLAG_ALLOW_WRONG_ARGS),
+        (PurpleCmdFlag)(PURPLE_CMD_FLAG_PRPL_ONLY | PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT
+            | PURPLE_CMD_FLAG_ALLOW_WRONG_ARGS),
         LINE_PRPL_ID,
         WRAPPER(PurpleLine::cmd_history),
         "Shows more chat history. Optional argument specifies number of messages to show.",
@@ -26,7 +26,7 @@ void PurpleLine::register_commands() {
         "open",
         "w",
         PURPLE_CMD_P_PRPL,
-        (PurpleCmdFlag)(PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT),
+        (PurpleCmdFlag)(PURPLE_CMD_FLAG_PRPL_ONLY | PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT),
         LINE_PRPL_ID,
         WRAPPER(PurpleLine::cmd_open),
         "Opens an attachment (image, audio) by number.",
