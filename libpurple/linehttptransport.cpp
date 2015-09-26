@@ -278,7 +278,8 @@ void LineHttpTransport::ssl_read(gint, PurpleInputCondition) {
 
         response_str.append((const char *)buf, count);
 
-        try_parse_response_header();
+        if (content_length_ < 0)
+            try_parse_response_header();
 
         if (content_length_ >= 0 && response_str.size() >= (size_t)content_length_) {
             purple_input_remove(input_handle);
@@ -359,6 +360,9 @@ void LineHttpTransport::try_parse_response_header() {
     size_t header_end = response_str.find("\r\n\r\n");
     if (header_end == std::string::npos)
         return;
+
+    if (content_length_ == -1)
+        content_length_ = 0;
 
     std::istringstream stream(response_str.substr(0, header_end));
 
