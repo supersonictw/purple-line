@@ -45,9 +45,13 @@ $(MAIN): $(OBJS) $(THRIFT_DEP)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -std=c++11 -c $< -o $@
 
-thrift_line: line.thrift $(THRIFT_DEP)
+# The Thrift generator generates three files at once, this file shall represent them.
+thrift_line/TalkService.cpp: line.thrift $(THRIFT_DEP) $@
 	mkdir -p thrift_line
 	$(THRIFT) --gen cpp -out thrift_line line.thrift
+
+# If the representative file exists, the others should too.
+thrift_line/line_types.cpp thrift_line/line_constants.cpp: thrift_line/TalkService.cpp
 
 $(THRIFT):
 	mkdir -p $(THRIFT_STATIC_DIR)
@@ -66,6 +70,7 @@ $(THRIFT):
 
 .PHONY: clean
 clean:
+	rm -f .depend
 	rm -f $(MAIN)
 	rm -f *.o
 	rm -rf thrift_line
@@ -97,18 +102,9 @@ uninstall:
 
 depend: .depend
 
-.depend: thrift_line $(REAL_SRCS)
-	rm -f .depend
-	$(CXX) $(CXXFLAGS) -MM $(REAL_SRCS) >>.depend
+.depend: $(SRCS)
+	$(CXX) $(CXXFLAGS) -MM $(REAL_SRCS) >.depend
 
 ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(MAKECMDGOALS),user-install)
-ifneq ($(MAKECMDGOALS),user-uninstall)
-ifneq ($(MAKECMDGOALS),install)
-ifneq ($(MAKECMDGOALS),uninstall)
 -include .depend
-endif
-endif
-endif
-endif
 endif
