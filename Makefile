@@ -6,7 +6,7 @@ clean:
 	$(MAKE) -C libpurple clean
 
 .PHONY: user-install
-user-install: all
+user-install:
 	$(MAKE) -C libpurple user-install
 
 .PHONY: user-uninstall
