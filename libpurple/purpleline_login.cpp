@@ -170,10 +170,15 @@ void PurpleLine::get_auth_token() {
 
 // This may throw.
 std::string PurpleLine::get_encrypted_credentials(line::RSAKey &key) {
-    if (!gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P)) {
-        if (!gcry_check_version(GCRYPT_VERSION))
-            throw new std::runtime_error("libgcrypt version mismatch.");
+    if (!gcry_check_version(GCRYPT_VERSION)) {
+        std::string err = "libgcrypt version mismatch (compiled: " GCRYPT_VERSION " runtime: ";
+        err += gcry_check_version(nullptr);
+        err += ")";
 
+        throw std::runtime_error(err);
+    }
+
+    if (!gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P)) {
         gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
 
         gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
