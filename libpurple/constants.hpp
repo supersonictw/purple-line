@@ -14,7 +14,7 @@
 #define LINE_SHOP_PATH "/SHOP4"
 
 #define LINE_USER_AGENT "purple-line (LINE for libpurple/Pidgin)"
-#define LINE_APPLICATION "DESKTOPWIN\t3.2.1.83\tWINDOWS\t5.1.2600-XP-x64"
+#define LINE_APPLICATION "DESKTOPWIN\t4.1.3.586\tWINDOWS\t5.1.2600-XP-x64"
 
 #define LINE_ACCOUNT_CERTIFICATE "line-certificate"
 #define LINE_ACCOUNT_AUTH_TOKEN "line-auth-token"
