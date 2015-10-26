@@ -49,7 +49,7 @@ void PurpleLine::write_message(line::Message &msg, bool replay) {
     int flags = 0;
     time_t mtime = (time_t)(msg.createdTime / 1000);
 
-    bool sent = (msg.from == profile.mid);
+    bool sent = (msg.from_ == profile.mid);
 
     if (std::find(recent_messages.cbegin(), recent_messages.cend(), msg.id)
         != recent_messages.cend())
@@ -59,17 +59,17 @@ void PurpleLine::write_message(line::Message &msg, bool replay) {
     }
 
     // Hack
-    if (msg.from == msg.to)
+    if (msg.from_ == msg.to)
         push_recent_message(msg.id);
 
     PurpleConversation *conv = purple_find_conversation_with_account(
         (msg.toType == line::MIDType::USER ? PURPLE_CONV_TYPE_IM : PURPLE_CONV_TYPE_CHAT),
-        ((!sent && msg.toType == line::MIDType::USER) ? msg.from.c_str() : msg.to.c_str()),
+        ((!sent && msg.toType == line::MIDType::USER) ? msg.from_.c_str() : msg.to.c_str()),
         acct);
 
     // If this is a new received IM, create the conversation if it doesn't exist
     if (!conv && !sent && msg.toType == line::MIDType::USER)
-        conv = purple_conversation_new(PURPLE_CONV_TYPE_IM, acct, msg.from.c_str());
+        conv = purple_conversation_new(PURPLE_CONV_TYPE_IM, acct, msg.from_.c_str());
 
     // If this is a new conversation, we're not replaying history and history hasn't been fetched
     // yet, queue the message instead of showing it.
@@ -247,7 +247,7 @@ void PurpleLine::write_message(line::Message &msg, bool replay) {
     if (sent) {
         // Messages sent by user (sync from other devices)
 
-        write_message(conv, msg.from, text, mtime, flags | PURPLE_MESSAGE_SEND);
+        write_message(conv, msg.from_, text, mtime, flags | PURPLE_MESSAGE_SEND);
     } else {
         // Messages received from other users
 
@@ -256,12 +256,12 @@ void PurpleLine::write_message(line::Message &msg, bool replay) {
         if (replay) {
             // Write replayed messages instead of serv_got_* to avoid Pidgin's IM sound
 
-            write_message(conv, msg.from, text, mtime, flags);
+            write_message(conv, msg.from_, text, mtime, flags);
         } else {
             if (msg.toType == line::MIDType::USER) {
                 serv_got_im(
                     conn,
-                    msg.from.c_str(),
+                    msg.from_.c_str(),
                     text.c_str(),
                     (PurpleMessageFlags)flags,
                     mtime);
@@ -269,7 +269,7 @@ void PurpleLine::write_message(line::Message &msg, bool replay) {
                 serv_got_chat_in(
                     conn,
                     purple_conv_chat_get_id(PURPLE_CONV_CHAT(conv)),
-                    msg.from.c_str(),
+                    msg.from_.c_str(),
                     (PurpleMessageFlags)flags,
                     text.c_str(),
                     mtime);

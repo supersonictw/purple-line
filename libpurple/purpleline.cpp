@@ -286,7 +286,7 @@ int PurpleLine::send_message(std::string to, const char *markup) {
             line::Message msg;
 
             msg.contentType = line::ContentType::NONE;
-            msg.from = profile.mid;
+            msg.from_ = profile.mid;
             msg.to = to;
             msg.text = markup_unescape(text);
 
@@ -296,8 +296,6 @@ int PurpleLine::send_message(std::string to, const char *markup) {
         }
 
         if (img_found) {
-            // Image test
-
             int image_id = std::stoi((char *)g_datalist_get_data(&attributes, "id"));
             g_datalist_clear(&attributes);
 
@@ -317,7 +315,7 @@ int PurpleLine::send_message(std::string to, const char *markup) {
             line::Message msg;
 
             msg.contentType = line::ContentType::IMAGE;
-            msg.from = profile.mid;
+            msg.from_ = profile.mid;
             msg.to = to;
 
             send_message(msg, [this, img_data](line::Message &msg_back) {

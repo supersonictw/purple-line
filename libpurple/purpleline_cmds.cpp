@@ -61,7 +61,6 @@ PurpleCmdRet PurpleLine::cmd_sticker(PurpleConversation *conv,
     }
 
     msg.contentType = line::ContentType::STICKER;
-    msg.from = profile.mid;
     msg.to = purple_conversation_get_name(conv);
 
     write_message(msg, false);

@@ -198,7 +198,7 @@ struct LoginResult {
 }
 
 struct Message {
-    1: string from;
+    1: string from_;
     2: string to;
     3: MIDType toType;
     4: string id;
