@@ -1,3 +1,8 @@
+purple-line (0.1.2-ubuntu2) vivid; urgency=low
+
+    * Internal LINE version updated.Fix new thrift bug.
+
+ -- Akira Nakagawa <matyapiro31@gmail.com>  Wed, 28 Oct 2015 20:30:00 +0900
 purple-line (0.1.1-ubuntu2) vivid; urgency=low
 
     * Support new LINE login.
