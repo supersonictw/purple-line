@@ -21,8 +21,10 @@ For instructions for adding a custom repository on Ubuntu, see
 For Debian, see [the Debian wiki](https://www.debian.org/releases/), or just add the following line
 to your `sources.list` file:
 
-    deb http://debian.altrepo.eu/ stable main
+    deb http://debian.altrepo.eu/ code_name main
 
+The code name is wriiten in
+[debian.altrepo.eu wiki](http://altrepo.eu/git/debian.altrepo.eu/wikis/home#note).
 In order to validate package signatures you need to add
 [this public key](http://debian.altrepo.eu/altrepo_eu.pub) to the APT key list. It can be done
 using the following command:
@@ -34,6 +36,22 @@ the plugin:
 
     sudo apt-get update
     sudo apt-get install purple-line
+
+Install from source (Ubuntu/Debian)
+-----------------------------------
+
+apt-build enables you to install from source easily.
+You need to add source entry to /etc/apt/sources.list.
+
+    sudo apt-get install apt-build
+    echo 'deb-src http://debian.altrepo.eu/ code_name main' >> /etc/apt/sources.list
+    sudo apt-build install purple-line
+    
+
+Note that apt-build is not official apt family.
+If you install via source, your purple-line version is
+up to date with git repository.So, make sure that the installation via source is not tested.
+Compile will fail if build dependencies are not correctly set.
 
 Install from source (Arch Linux)
 --------------------------------
