@@ -23,7 +23,7 @@ to your `sources.list` file:
 
     deb http://debian.altrepo.eu/ code_name main
 
-The code name is wriiten in
+Replace code_name with your distribution specific codename. The codenames are listed in the
 [debian.altrepo.eu wiki](http://altrepo.eu/git/debian.altrepo.eu/wikis/home#note).
 In order to validate package signatures you need to add
 [this public key](http://debian.altrepo.eu/altrepo_eu.pub) to the APT key list. It can be done
@@ -40,18 +40,19 @@ the plugin:
 Install from source (Ubuntu/Debian)
 -----------------------------------
 
-apt-build enables you to install from source easily.
-You need to add source entry to /etc/apt/sources.list.
+apt-build enables you to install from source easily. You need to add a source entry to
+/etc/apt/sources.list. Run the following commands as root to install from source:
 
-    sudo apt-get install apt-build
-    echo 'deb-src http://debian.altrepo.eu/ code_name main' >> /etc/apt/sources.list
-    sudo apt-build install purple-line
-    
+    apt-get install apt-build
+    echo "deb-src http://debian.altrepo.eu/ code_name main" >> /etc/apt/sources.list
+    echo "deb http://debian.altrepo.eu/ code_name main" >> /etc/apt/sources.list
+    apt-get update
+    apt-build -y install purple-line
 
-Note that apt-build is not official apt family.
-If you install via source, your purple-line version is
-up to date with git repository.So, make sure that the installation via source is not tested.
-Compile will fail if build dependencies are not correctly set.
+Note that apt-build is not an official APT family program. If you install via source, your
+purple-line version will be up to date with the git repository. Note that the current git version
+may not have been tested on Ubuntu/Debian. The package will install known build dependencies, but if
+the git version requires new dependencies, compilation will fail.
 
 Install from source (Arch Linux)
 --------------------------------
