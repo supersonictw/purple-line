@@ -1,6 +1,6 @@
 #pragma once
 
-#define LINE_PRPL_ID "prpl-mvirkkunen-line"
+#define LINE_PRPL_ID "prpl-line"
 
 #define LINE_THRIFT_SERVER "gd2.line.naver.jp"
 #define LINE_OS_SERVER "os.line.naver.jp"

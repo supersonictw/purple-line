@@ -14,8 +14,6 @@
 #include "poller.hpp"
 #include "pinverifier.hpp"
 
-#define LINEPRPL_ID "prpl-mvirkkunen-line"
-
 class ThriftClient;
 
 template <typename T>

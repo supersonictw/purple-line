@@ -38,7 +38,7 @@ static void init_info(PurplePluginInfo &i) {
     i.summary = (char *)"Plugin for Naver LINE";
     i.description = (char *)"Plugin for Naver LINE";
     i.author = (char *)"Matti Virkkunen <mvirkkunen@gmail.com>";
-    i.homepage = (char *)"https://github.com/mvirkkunen/purple-line";
+    i.homepage = (char *)"http://altrepo.eu/git/purple-line";
 
     i.destroy = line_plugin_destroy;
     i.extra_info = (void *)&prpl_info;
