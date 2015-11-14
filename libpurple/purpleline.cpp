@@ -503,6 +503,10 @@ void PurpleLine::fetch_conversation_history(PurpleConversation *conv, int count,
     if (end_seq_p)
         end_seq = *end_seq_p;
 
+    purple_debug_info("line",
+        "Fetching history: end_seq=%" G_GINT64_FORMAT " , count=%d, requested=%d\n",
+        end_seq, count, requested);
+
     if (end_seq != -1)
         c_out->send_getPreviousMessages(name, end_seq - 1, count);
     else
@@ -601,6 +605,8 @@ void PurpleLine::fetch_conversation_history(PurpleConversation *conv, int count,
             delete end_seq_p;
 
         purple_conversation_set_data(conv, "line-end-seq", new int64_t(new_end_seq));
+
+        purple_debug_info("line", "History done: new_end_seq=%" G_GINT64_FORMAT "\n", new_end_seq);
     });
 }
 
