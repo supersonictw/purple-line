@@ -106,5 +106,7 @@ depend: .depend
 	$(CXX) $(CXXFLAGS) -MM $(REAL_SRCS) >.depend
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),uninstall)
 -include .depend
+endif
 endif
