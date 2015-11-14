@@ -34,7 +34,8 @@ void Poller::fetch_operations() {
             fetch_operations();
             return;
         } else if (status != 200) {
-            purple_debug_warning("line", "fetchOperations error %d. TODO: Retry after a timeout", status);
+            purple_debug_warning("line", "fetchOperations error %d. TODO: Retry after a timeout.\n",
+                status);
             return;
         }
 

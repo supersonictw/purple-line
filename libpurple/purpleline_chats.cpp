@@ -177,7 +177,7 @@ GList *PurpleLine::chat_info() {
 void PurpleLine::join_chat(GHashTable *components) {
     char *id_ptr = (char *)g_hash_table_lookup(components, "id");
     if (!id_ptr) {
-        purple_debug_warning("line", "Tried to join a chat with no id.");
+        purple_debug_warning("line", "Tried to join a chat with no id.\n");
         return;
     }
 
@@ -186,7 +186,7 @@ void PurpleLine::join_chat(GHashTable *components) {
     ChatType type = get_chat_type((char *)g_hash_table_lookup(components, "type"));
 
     if (type == ChatType::ANY) {
-        purple_debug_warning("line", "Tried to join a chat with weird type.");
+        purple_debug_warning("line", "Tried to join a chat with weird type.\n");
         return;
     }
 
@@ -210,7 +210,7 @@ void PurpleLine::join_chat(GHashTable *components) {
                 c_out->recv_getGroup(group);
 
                 if (!group.__isset.id) {
-                    purple_debug_warning("line", "Couldn't get group: %s", group.id.c_str());
+                    purple_debug_warning("line", "Couldn't get group: %s\n", group.id.c_str());
                     return;
                 }
 
@@ -246,7 +246,7 @@ void PurpleLine::join_chat_success(ChatType type, std::string id) {
 void PurpleLine::reject_chat(GHashTable *components) {
     char *id_ptr = (char *)g_hash_table_lookup(components, "id");
     if (!id_ptr) {
-        purple_debug_warning("line", "Tried to reject an invitation with no id.");
+        purple_debug_warning("line", "Tried to reject an invitation with no id.\n");
         return;
     }
 
@@ -282,7 +282,7 @@ void PurpleLine::chat_leave(int id) {
 int PurpleLine::chat_send(int id, const char *message, PurpleMessageFlags flags) {
     PurpleConversation *conv = purple_find_chat(conn, id);
     if (!conv) {
-        purple_debug_warning("line", "Tried to send to a nonexistent chat.");
+        purple_debug_warning("line", "Tried to send to a nonexistent chat.\n");
         return 0;
     }
 

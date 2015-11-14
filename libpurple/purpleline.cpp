@@ -451,7 +451,7 @@ void PurpleLine::signal_blist_node_removed(PurpleBlistNode *node) {
 
     char *id_ptr = (char *)g_hash_table_lookup(components, "id");
     if (!id_ptr) {
-        purple_debug_warning("line", "Tried to remove a chat with no id.");
+        purple_debug_warning("line", "Tried to remove a chat with no id.\n");
         return;
     }
 
@@ -478,7 +478,7 @@ void PurpleLine::signal_blist_node_removed(PurpleBlistNode *node) {
             }
         });
     } else {
-        purple_debug_warning("line", "Tried to remove a chat with no type.");
+        purple_debug_warning("line", "Tried to remove a chat with no type.\n");
         return;
     }
 }
