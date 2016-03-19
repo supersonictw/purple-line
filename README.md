@@ -11,10 +11,11 @@ Install via package manager (Ubuntu/Debian)
 An APT repository is available for installing the plugin. The repository contains the purple-line
 package itself, and the required Apache Thrift packages which are not properly packaged by either
 distribution.
-You can access the mirror via SSL,if you like to transport safely,use the mirror with **https://** .
 
 * http://debian.altrepo.eu/ (main)
 * http://debian.surlinter.net/ (mirror)
+
+The mirror is also available via SSL for secure access by using a **https://** url.
 
 For instructions for adding a custom repository on Ubuntu, see
 [the Ubuntu wiki](https://help.ubuntu.com/community/Repositories/Ubuntu).
@@ -43,12 +44,14 @@ Install from source (Ubuntu/Debian)
 
 apt-build enables you to install from source easily. You need to add a source entry to
 /etc/apt/sources.list. Run the following commands to install from source:
+
 <pre><code>sudo apt-get install apt-build
 echo "deb-src http://debian.altrepo.eu/ <b>code_name</b> main" | sudo tee -a /etc/apt/sources.list
 echo "deb http://debian.altrepo.eu/ <b>code_name</b> main" | sudo tee -a /etc/apt/sources.list
 sudo apt-get update
 sudo apt-build install purple-line
 </code></pre>
+
 Note that apt-build is **not** an official APT family program. If you install via source, your
 purple-line version will be up to date with the git repository. Note that the current git version
 may not have been tested on Ubuntu/Debian. The package will install known build dependencies, but if
@@ -89,10 +92,10 @@ You can also install the plugin for your user only by replacing `install` with `
 Install on Windows
 ------------------
 
-Pre-build binary for Windows is provided by [Eion's Website](http://eion.robbmob.com/line/).
+Pre-built binaries for Windows are available at [Eion Robb's website](http://eion.robbmob.com/line/).
 
-If you want to use purple-line with Pidgin or Finch, installing libline.dll into `C:\Program Files (x86)\Pidgin\plugins\` and 
-libgcrypt-20.dll & libgpg-error-0.dll into `C:\Program Files (x86)\Pidgin\`.
+If you want to use purple-line with Pidgin or Finch, copy libline.dll into `C:\Program Files (x86)\Pidgin\plugins\`
+and libgcrypt-20.dll & libgpg-error-0.dll into `C:\Program Files (x86)\Pidgin\`.
 
 Features implemented
 --------------------
