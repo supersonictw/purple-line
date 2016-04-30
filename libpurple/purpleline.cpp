@@ -350,6 +350,11 @@ void PurpleLine::send_message(
                 acct);
 
             if (conv) {
+                if (err.code == line::ErrorCode::E2EE_RETRY_ENCRYPT) {
+                    msg = "Failed to send message: Cannot send with Letter Sealing enabled.";
+                    write_e2ee_error(conv);
+                }
+
                 purple_conversation_write(
                     conv,
                     "",

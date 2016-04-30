@@ -44,6 +44,22 @@ static std::string get_sticker_url(line::Message &msg, bool thumb = false) {
     return url.str();
 }
 
+void PurpleLine::write_e2ee_error(PurpleConversation *conv) {
+    if (purple_conversation_get_data(conv, "line-e2ee-error-shown"))
+        return;
+
+    purple_conversation_write(
+        conv,
+        "",
+        "Letter Sealing encryption is not supported by purple-line. As a workaround, if you do not "
+            "need end-to-end encryption, Letter Sealing can be turned off from LINE settings on "
+            "your mobile device.",
+        (PurpleMessageFlags)PURPLE_MESSAGE_ERROR,
+        time(NULL));
+
+    purple_conversation_set_data(conv, "line-e2ee-error-shown", GINT_TO_POINTER(1));
+}
+
 void PurpleLine::write_message(line::Message &msg, bool replay) {
     std::string text;
     int flags = 0;
@@ -92,7 +108,10 @@ void PurpleLine::write_message(line::Message &msg, bool replay) {
     switch (msg.contentType) {
         case line::ContentType::NONE: // actually text
         case line::ContentType::LOCATION:
-            if (msg.__isset.location) {
+            if (msg.contentMetadata.count("e2eeVersion")) {
+                text = "<em>[Letter Sealing encrypted message]</em>";
+                write_e2ee_error(conv);
+            } else if (msg.__isset.location) {
                 line::Location &loc = msg.location;
 
                 text = markup_escape(loc.title)

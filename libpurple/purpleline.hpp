@@ -134,6 +134,7 @@ private:
     void write_message(line::Message &msg, bool replay);
     void write_message(PurpleConversation *conv, std::string &from, std::string &text,
         time_t mtime, int flags);
+    void write_e2ee_error(PurpleConversation *conv);
 
     std::string get_room_display_name(line::Room &room);
     void set_chat_participants(PurpleConvChat *chat, line::Room &room);
