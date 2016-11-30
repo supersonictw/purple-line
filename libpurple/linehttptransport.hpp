@@ -81,7 +81,7 @@ public:
     virtual void close();
 
     virtual uint32_t read_virt(uint8_t *buf, uint32_t len);
-    void write_virt(const uint8_t *buf, uint32_t len);
+    virtual void write_virt(const uint8_t *buf, uint32_t len);
 
     void request(std::string method, std::string path, std::string content_type,
         std::function<void()> callback);
