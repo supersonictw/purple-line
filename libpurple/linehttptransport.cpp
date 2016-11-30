@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <sstream>
 #include <limits>
 
@@ -374,19 +375,22 @@ void LineHttpTransport::try_parse_response_header() {
         std::string name, value;
 
         std::getline(stream, name, ':');
+        std::transform(name.begin(), name.end(), name.begin(), tolower);
+
         stream.ignore(256, ' ');
 
-        if (name == "Content-Length")
+        if (name == "content-length")
             stream >> content_length_;
 
-        if (name == "X-LS")
+        if (name == "x-ls")
             std::getline(stream, x_ls, '\r');
 
-        if (name == "Connection") {
+        if (name == "connection") {
             std::string value;
             std::getline(stream, value, '\r');
+            std::transform(value.begin(), value.end(), value.begin(), tolower);
 
-            if (value == "Keep-Alive" || value == "Keep-alive" || value == "keep-alive")
+            if (value == "keep-alive")
                 keep_alive = true;
         }
 
