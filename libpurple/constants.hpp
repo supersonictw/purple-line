@@ -16,5 +16,6 @@
 #define LINE_USER_AGENT "purple-line (LINE for libpurple/Pidgin)"
 #define LINE_APPLICATION "DESKTOPWIN\t4.6.1.931\tWINDOWS\t5.2.2-XP-x64"
 
+// If you change these account setting constants, it'll break hacks in bitlbee.
 #define LINE_ACCOUNT_CERTIFICATE "line-certificate"
 #define LINE_ACCOUNT_AUTH_TOKEN "line-auth-token"
