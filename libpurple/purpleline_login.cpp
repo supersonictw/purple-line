@@ -31,7 +31,10 @@ void PurpleLine::login_start() {
     purple_connection_set_state(conn, PURPLE_CONNECTING);
     purple_connection_update_progress(conn, "Logging in", 0, 3);
 
-    std::string auth_token = purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, "");
+    // The hacks in bitlbee apparently can make this return NULL instead of "" as it should.
+    // This is a counter-hack.
+    const char *c_auth_token = purple_account_get_string(acct, LINE_ACCOUNT_AUTH_TOKEN, "");
+    std::string auth_token = (c_auth_token ? c_auth_token : "");
 
     if (auth_token != "") {
         // There's a stored authentication token, see if it works
