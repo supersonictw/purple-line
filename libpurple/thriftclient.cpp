@@ -8,11 +8,11 @@
 
 ThriftClient::ThriftClient(PurpleAccount *acct, PurpleConnection *conn, std::string path)
     : line::TalkServiceClient(
-        boost::make_shared<apache::thrift::protocol::TCompactProtocol>(
-            boost::make_shared<LineHttpTransport>(acct, conn, LINE_THRIFT_SERVER, 443, true))),
+        std::make_shared<apache::thrift::protocol::TCompactProtocol>(
+            std::make_shared<LineHttpTransport>(acct, conn, LINE_THRIFT_SERVER, 443, true))),
     path(path)
 {
-    http = boost::static_pointer_cast<LineHttpTransport>(getInputProtocol()->getTransport());
+    http = std::static_pointer_cast<LineHttpTransport>(getInputProtocol()->getTransport());
 }
 
 void ThriftClient::set_path(std::string path) {

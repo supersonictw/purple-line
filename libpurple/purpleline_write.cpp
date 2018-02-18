@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "purpleline.hpp"
 
 static std::string get_sticker_id(line::Message &msg) {

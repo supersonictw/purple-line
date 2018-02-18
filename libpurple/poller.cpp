@@ -9,7 +9,7 @@
 Poller::Poller(PurpleLine &parent)
     : parent(parent)
 {
-    client = boost::make_shared<ThriftClient>(parent.acct, parent.conn, LINE_POLL_PATH);
+    client = std::make_shared<ThriftClient>(parent.acct, parent.conn, LINE_POLL_PATH);
     client->set_auto_reconnect(true);
 }
 

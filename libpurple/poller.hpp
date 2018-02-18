@@ -15,7 +15,7 @@ class Poller {
 
     PurpleLine &parent;
 
-    boost::shared_ptr<ThriftClient> client;
+    std::shared_ptr<ThriftClient> client;
     int64_t local_rev;
 
 public:

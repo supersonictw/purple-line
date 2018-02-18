@@ -66,7 +66,7 @@ class PurpleLine {
     PurpleConnection *conn;
     PurpleAccount *acct;
 
-    boost::shared_ptr<ThriftClient> c_out;
+    std::shared_ptr<ThriftClient> c_out;
 
     HTTPClient http;
 

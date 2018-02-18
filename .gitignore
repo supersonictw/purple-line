@@ -4,3 +4,4 @@ thrift_static
 libline.so
 .depend
 *.geany
+.vscode
