@@ -107,6 +107,7 @@ void Poller::fetch_operations() {
 
                 case line::OpType::NOTIFIED_LEAVE_ROOM: // 24
                     parent.blist_update_chat(op.param1, ChatType::ROOM);
+                    break;
 
                 case line::OpType::SEND_MESSAGE: // 25
                 case line::OpType::RECEIVE_MESSAGE: // 26
