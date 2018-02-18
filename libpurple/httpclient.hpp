@@ -15,7 +15,7 @@ enum class HTTPFlag {
 
 inline constexpr HTTPFlag operator|(HTTPFlag a, HTTPFlag b) {
     return (HTTPFlag)((int)a | (int)b);
-};
+}
 
 inline constexpr bool operator&(HTTPFlag a, HTTPFlag b) {
     return ((int)a & (int)b) != 0;

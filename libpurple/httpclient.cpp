@@ -140,6 +140,8 @@ void HTTPClient::complete(HTTPClient::Request *req,
 void HTTPClient::purple_cb(PurpleUtilFetchUrlData *url_data, gpointer user_data,
     const gchar *url_text, gsize len, const gchar *error_message)
 {
+    (void)url_data;
+
     Request *req = (Request *)user_data;
 
     req->client->complete(req, url_text, len, error_message);

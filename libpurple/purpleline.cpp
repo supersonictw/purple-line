@@ -131,6 +131,8 @@ char *PurpleLine::status_text(PurpleBuddy *buddy) {
 }
 
 void PurpleLine::tooltip_text(PurpleBuddy *buddy, PurpleNotifyUserInfo *user_info, gboolean full) {
+    (void)full;
+
     purple_notify_user_info_add_pair_plaintext(user_info,
         "Name", purple_buddy_get_alias(buddy));
 
@@ -427,6 +429,8 @@ void PurpleLine::push_recent_message(std::string id) {
 }
 
 int PurpleLine::send_im(const char *who, const char *message, PurpleMessageFlags flags) {
+    (void)flags;
+
     return send_message(who, message);
 }
 

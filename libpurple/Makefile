@@ -12,7 +12,7 @@ else
 endif
 
 CXX ?= g++
-CXXFLAGS = -g -Wall -shared -fPIC \
+CXXFLAGS = -g -Wall -Wextra -Werror -pedantic -shared -fPIC \
 	-DHAVE_INTTYPES_H -DHAVE_CONFIG_H -DPURPLE_PLUGINS \
 	`pkg-config --cflags purple` `libgcrypt-config --cflags` `gpg-error-config --cflags` \
 	$(THRIFT_CXXFLAGS)

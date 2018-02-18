@@ -280,6 +280,8 @@ void PurpleLine::chat_leave(int id) {
 }
 
 int PurpleLine::chat_send(int id, const char *message, PurpleMessageFlags flags) {
+    (void)flags;
+
     PurpleConversation *conv = purple_find_chat(conn, id);
     if (!conv) {
         purple_debug_warning("line", "Tried to send to a nonexistent chat.\n");

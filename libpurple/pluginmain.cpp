@@ -68,10 +68,14 @@ static void init_prpl_info(PurplePluginProtocolInfo &i) {
 }
 
 static void line_plugin_destroy(PurplePlugin *plugin) {
+    (void)plugin;
+
     purple_debug_info("line", "shutting down\n");
 }
 
 static void line_plugin_init(PurplePlugin *plugin) {
+    (void)plugin;
+
     init_info(info);
     init_prpl_info(prpl_info);
 
@@ -79,5 +83,5 @@ static void line_plugin_init(PurplePlugin *plugin) {
 }
 
 extern "C" {
-    PURPLE_INIT_PLUGIN(line, line_plugin_init, info);
+    PURPLE_INIT_PLUGIN(line, line_plugin_init, info)
 }
