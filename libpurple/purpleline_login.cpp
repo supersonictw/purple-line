@@ -126,10 +126,6 @@ void PurpleLine::get_auth_token() {
         if (ui_name_p)
             ui_name = (char *)ui_name_p;
 
-        purple_debug_info(
-            "line", "keynm %s credentials %s ui_name %s certificate %s",
-            key.keynm.c_str(), credentials.c_str(), ui_name.c_str(), certificate.c_str());
-
         c_out->set_path(LINE_LOGINZ_PATH);
 
         line::LoginRequest req;
