@@ -81,6 +81,9 @@ void PurpleLine::login_start() {
 void PurpleLine::get_auth_token() {
     purple_debug_info("line", "Logging in with credentials to get new auth token.\n");
 
+    c_out->close();
+    c_out->set_path(LINE_LOGIN_PATH);
+
     c_out->send_getRSAKeyInfo(line::IdentityProvider::LINE);
     c_out->send([this]() {
         line::RSAKey key;
@@ -88,15 +91,28 @@ void PurpleLine::get_auth_token() {
 
         try {
             c_out->recv_getRSAKeyInfo(key);
+        } catch (line::TalkException &err) {
+            purple_debug_info(
+                "line", "Login error in getRSAKeyInfo: %d %s\n",
+                err.code, err.reason.c_str());
 
+            std::string msg = "Could not log in. " + err.reason;
+
+            conn->wants_to_die = TRUE;
+            purple_connection_error(conn, msg.c_str());
+
+            return;
+        }
+
+        try {
             credentials = get_encrypted_credentials(key);
         } catch (std::exception &ex) {
+            purple_debug_info("line", "Login error in get_encrypted_credentials: %s\n", ex.what());
+
             std::string msg = std::string("Could not log in. ") + ex.what();
 
             conn->wants_to_die = TRUE;
-            purple_connection_error(
-                conn,
-                msg.c_str());
+            purple_connection_error(conn, msg.c_str());
 
             return;
         }
@@ -110,29 +126,42 @@ void PurpleLine::get_auth_token() {
         if (ui_name_p)
             ui_name = (char *)ui_name_p;
 
-        c_out->send_loginWithIdentityCredentialForCertificate(
-            line::IdentityProvider::LINE,
-            key.keynm,
-            credentials,
-            true,
-            "127.0.0.1",
-            ui_name,
-            certificate);
+        purple_debug_info(
+            "line", "keynm %s credentials %s ui_name %s certificate %s",
+            key.keynm.c_str(), credentials.c_str(), ui_name.c_str(), certificate.c_str());
+
+        c_out->set_path(LINE_LOGINZ_PATH);
+
+        line::LoginRequest req;
+        req.type = line::LoginType::ID_CREDENTIAL;
+        req.identityProvider = line::IdentityProvider::LINE;
+        req.identifier = key.keynm;
+        req.password = credentials;
+        req.keepLoggedIn = true;
+        req.accessLocation = "127.0.0.1";
+        req.systemName = ui_name;
+        req.certificate = certificate;
+
+        c_out->send_loginZ(req);
         c_out->send([this]() {
             line::LoginResult result;
 
             try {
-                c_out->recv_loginWithIdentityCredentialForCertificate(result);
+                c_out->recv_loginZ(result);
             } catch (line::TalkException &err) {
+                purple_debug_info(
+                    "line", "Login error in loginZ: %d %s\n",
+                    err.code, err.reason.c_str());
+
                 std::string msg = "Could not log in. " + err.reason;
 
                 conn->wants_to_die = TRUE;
-                purple_connection_error(
-                    conn,
-                    msg.c_str());
+                purple_connection_error(conn, msg.c_str());
 
                 return;
             }
+
+            c_out->set_path(LINE_COMMAND_PATH);
 
             if (result.type == line::LoginResultType::SUCCESS && result.authToken != "")
             {
@@ -145,6 +174,8 @@ void PurpleLine::get_auth_token() {
                 purple_debug_info("line", "Starting PIN verification.\n");
 
                 pin_verifier.verify(result, [this](std::string auth_token, std::string certificate) {
+                    (void)auth_token;
+
                     if (certificate != "") {
                         purple_account_set_string(
                             acct,
@@ -152,9 +183,9 @@ void PurpleLine::get_auth_token() {
                             certificate.c_str());
                     }
 
-                    set_auth_token(auth_token);
-
-                    get_last_op_revision();
+                    // For some reason the auth token received from the PIN verification doesn't
+                    // work. However the "certificate" does, so just get another auth token.
+                    get_auth_token();
                 });
             }
             else
@@ -163,9 +194,7 @@ void PurpleLine::get_auth_token() {
                 ss << result.type;
                 std::string msg = ss.str();
 
-                purple_connection_error(
-                    conn,
-                    msg.c_str());
+                purple_connection_error(conn, msg.c_str());
             }
         });
     });
@@ -265,8 +294,8 @@ void PurpleLine::set_auth_token(std::string auth_token) {
 
     // Re-open output client to update persistent headers
     c_out->close();
+
     c_out->set_auto_reconnect(true);
-    c_out->set_path(LINE_COMMAND_PATH);
 }
 
 void PurpleLine::get_last_op_revision() {

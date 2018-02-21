@@ -308,6 +308,9 @@ void LineHttpTransport::ssl_read(gint, PurpleInputCondition) {
                 std::string msg = "LINE: TalkException: ";
                 msg += err.reason;
 
+                purple_debug_info("line", "TalkException: %s (%d)\n",
+                    err.reason.c_str(), err.code);
+
                 if (err.code == line::ErrorCode::NOT_AUTHORIZED_DEVICE) {
                     purple_account_remove_setting(acct, LINE_ACCOUNT_AUTH_TOKEN);
 

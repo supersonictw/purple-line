@@ -49,7 +49,7 @@ PurpleLine::PurpleLine(PurpleConnection *conn, PurpleAccount *acct) :
     pin_verifier(*this),
     next_purple_id(1)
 {
-    c_out = std::make_shared<ThriftClient>(acct, conn, LINE_LOGIN_PATH);
+    c_out = std::make_shared<ThriftClient>(acct, conn, LINE_COMMAND_PATH);
     os_http.set_auto_reconnect(true);
 }
 

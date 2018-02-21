@@ -232,12 +232,32 @@ struct Location {
     4: double longitude;
 }
 
+struct LoginRequest {
+    1: i32 type;
+    2: i32 identityProvider;
+    3: string identifier;
+    4: string password;
+    5: bool keepLoggedIn;
+    6: string accessLocation;
+    7: string systemName;
+    8: string certificate;
+    9: string verifier;
+    10: string secret;
+    11: i32 e2eeVersion;
+}
+
 struct LoginResult {
     1: string authToken;
     2: string certificate;
     3: string verifier;
     4: string pinCode;
     5: LoginResultType type;
+}
+
+enum LoginType {
+    ID_CREDENTIAL = 0;
+    QRCODE = 1;
+    ID_CREDENTIAL_WITH_E2EE = 2;
 }
 
 struct Message {
@@ -386,4 +406,10 @@ service TalkService {
         2: string mid,
         3: ContactSetting flag,
         4: string value) throws(1: TalkException e);
+
+    # This method actually belongs to AuthService but cannot be bothered to create another service
+    # just for one method.
+
+    LoginResult loginZ(
+        2: LoginRequest loginRequest) throws (1: TalkException e);
 }
