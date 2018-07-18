@@ -43,6 +43,7 @@ $(MAIN): $(OBJS) $(THRIFT_DEP)
 	strip $(MAIN)
 
 .cpp.o:
+	echo -e "\nWARNING: Line Corporation may permanently ban your account for using a 3rd party client. Comment this line out if you're ok with that.\n"; exit 1
 	$(CXX) $(CXXFLAGS) -std=c++11 -c $< -o $@
 
 # The Thrift generator generates three files at once, this file shall represent them.

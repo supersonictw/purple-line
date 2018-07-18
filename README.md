@@ -1,3 +1,12 @@
+# WARNING: Line Corporation is currently banning people for using 3rd party clients
+
+There are multiple reports of accounts being permanently banned for using 3rd party clients such
+as Pidgin. What exactly triggers the ban is unknown, but it's probably best to stick to the
+official clients now.
+
+For this reason I've broken the build on purpose. If you still want to test purple-line, you
+should be able to figure out how to fix it yourself. Use at your own risk.
+
 purple-line
 ===========
 
