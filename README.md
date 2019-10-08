@@ -1,4 +1,8 @@
-# WARNING: Line Corporation is currently banning people for using 3rd party clients
+# purple-line
+
+libpurple (Pidgin, Finch) protocol plugin for [LINE](http://line.me/).
+
+## WARNING: Line Corporation is currently banning people for using 3rd party clients
 
 There are multiple reports of accounts being permanently banned for using 3rd party clients such
 as Pidgin. What exactly triggers the ban is unknown, but it's probably best to stick to the
@@ -7,13 +11,7 @@ official clients now.
 For this reason I've broken the build on purpose. If you still want to test purple-line, you
 should be able to figure out how to fix it yourself. Use at your own risk.
 
-purple-line
-===========
-
-libpurple (Pidgin, Finch) protocol plugin for [LINE](http://line.me/).
-
-Install from source (any distribution)
---------------------------------------
+## Install from source (any distribution)
 
 Make sure you have the required prerequisites installed:
 
@@ -34,16 +32,14 @@ distributions that do not package Thrift.
 
 You can also install the plugin for your user only by replacing `install` with `user-install`.
 
-Install on Windows
-------------------
+### Install on Windows
 
 Pre-built binaries for Windows are available at [Eion Robb's website](http://eion.robbmob.com/line/).
 
 If you want to use purple-line with Pidgin or Finch, copy libline.dll into `C:\Program Files (x86)\Pidgin\plugins\`
 and libgcrypt-20.dll & libgpg-error-0.dll into `C:\Program Files (x86)\Pidgin\`.
 
-Features implemented
---------------------
+## Features implemented
 
 * Logging in
   * Authentication
@@ -75,8 +71,7 @@ Features implemented
  * Audio (send/receive)
  * Location (receive)
 
-Features not yet implemented
-----------------------------
+## Features not yet implemented
 
 * Only fetch unseen messages, let a log plugin handle already seen messages
 * Implement timeouts for faster reconnections
@@ -104,9 +99,12 @@ Features not yet implemented
 * Check builds on more platforms
 * Packaging
 
-SuperSonic`s Develop Note
-----------------------------
+## SuperSonic's Develop Note
+
 I had thought that re-build a project called "PidginLine" 2 years ago since the "purple-line" had was discontinued...
+
 Anyway, the original project was updated last year!
+
 So, I gave up it instead of updating the "purple-line".
+
 Umm...I will keep updating its struct to connect LINE Services, nice to meet~
