@@ -12,70 +12,6 @@ purple-line
 
 libpurple (Pidgin, Finch) protocol plugin for [LINE](http://line.me/).
 
-![Screenshot](http://i.imgur.com/By1yLXB.png)
-
-Install via package manager (Ubuntu/Debian)
--------------------------------------------
-
-An APT repository is available for installing the plugin. The repository contains the purple-line
-package itself, and the required Apache Thrift packages which are not properly packaged by either
-distribution.
-
-* http://debian.altrepo.eu/ (main)
-* http://debian.surlinter.net/ (mirror)
-
-The mirror is also available via SSL for secure access by using a **https://** url.
-
-For instructions for adding a custom repository on Ubuntu, see
-[the Ubuntu wiki](https://help.ubuntu.com/community/Repositories/Ubuntu).
-
-For Debian, see [the Debian wiki](https://www.debian.org/releases/), or just add the following line
-to your `sources.list` file:
-
-<pre><code>deb http://debian.altrepo.eu/ <b>code_name</b> main</code></pre>
-
-Replace **code_name** with your distribution specific codename. The codenames are listed in the
-[debian.altrepo.eu wiki](http://altrepo.eu/git/debian.altrepo.eu/wikis/home#note).
-In order to validate package signatures you need to add
-[this public key](http://debian.altrepo.eu/altrepo_eu.pub) to the APT key list. It can be done
-using the following command:
-
-    wget -qO - http://debian.altrepo.eu/altrepo_eu.pub | sudo apt-key add -
-
-On either distribution, after adding the repository and key, run the following commands to install
-the plugin:
-
-    sudo apt-get update
-    sudo apt-get install purple-line
-
-Install from source (Ubuntu/Debian)
------------------------------------
-
-apt-build enables you to install from source easily. You need to add a source entry to
-/etc/apt/sources.list. Run the following commands to install from source:
-
-<pre><code>sudo apt-get install apt-build
-echo "deb-src http://debian.altrepo.eu/ <b>code_name</b> main" | sudo tee -a /etc/apt/sources.list
-echo "deb http://debian.altrepo.eu/ <b>code_name</b> main" | sudo tee -a /etc/apt/sources.list
-sudo apt-get update
-sudo apt-build install purple-line
-</code></pre>
-
-Note that apt-build is **not** an official APT family program. If you install via source, your
-purple-line version will be up to date with the git repository. Note that the current git version
-may not have been tested on Ubuntu/Debian. The package will install known build dependencies, but if
-the git version requires new dependencies, compilation will fail.
-
-Install from source (Arch Linux)
---------------------------------
-
-Arch Linux packages all the required dependencies and there's a PKGBUILD available (not yet in AUR).
-You can install the plugin by simply typing:
-
-    sudo pacman -S base-devel
-    curl -O http://altrepo.eu/git/arch.altrepo.eu/raw/master/purple-line/PKGBUILD
-    makepkg -cis
-
 Install from source (any distribution)
 --------------------------------------
 
@@ -167,3 +103,10 @@ Features not yet implemented
 * Sending/receiving "message read" notifications
 * Check builds on more platforms
 * Packaging
+
+SuperSonic`s Develop Note
+----------------------------
+I had thought that re-build a project called "PidginLine" 2 years ago since the "purple-line" had was discontinued...
+Anyway, the original project was updated last year!
+So, I gave up it instead of updating the "purple-line".
+Umm...I will keep updating its struct to connect LINE Services, nice to meet~
