@@ -61,15 +61,15 @@ and libgcrypt-20.dll & libgpg-error-0.dll into `C:\Program Files (x86)\Pidgin\`.
   * Leaving groups
 * Buddy icons
 * Editing buddy list
- * Removing friends
- * Leaving chats
- * Leaving groups
+* Removing friends
+* Leaving chats
+* Leaving groups
 * Message types
- * Text (send/receive)
- * Sticker (send via command/receive)
- * Image (send/receive)
- * Audio (send/receive)
- * Location (receive)
+  * Text (send/receive)
+  * Sticker (send via command/receive)
+  * Image (send/receive)
+  * Audio (send/receive)
+  * Location (receive)
 
 ## Features not yet implemented
 
