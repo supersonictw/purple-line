@@ -175,10 +175,10 @@ void PurpleLine::get_auth_token()
                 return;
             }
 
-            c_out->set_path(LINE_COMMAND_PATH);
-
             if (result.type == line::LoginResultType::SUCCESS && result.authToken != "")
             {
+                c_out->set_path(LINE_COMMAND_PATH);
+
                 set_auth_token(result.authToken);
 
                 get_last_op_revision();
@@ -199,6 +199,11 @@ void PurpleLine::get_auth_token()
                             certificate.c_str());
                     }
 
+                    c_out->set_path(LINE_COMMAND_PATH);
+
+                    get_last_op_revision();
+
+                // Reason? the old verification was Revoked.
                     // For some reason the auth token received from the PIN verification doesn't
                     // work. However the "certificate" does, so just get another auth token.
                     //get_auth_token();
@@ -429,11 +434,14 @@ void PurpleLine::get_groups() {
                 for (PurpleChat *chat : chats_to_delete)
                     purple_blist_remove_chat(chat);
 
-                get_rooms();
+                // Revoked
+                //get_rooms();
+
+                get_group_invites();
             });
         });
 }
-
+/*
 void PurpleLine::get_rooms() {
         c_out->send_getMessageBoxCompactWrapUpList(1, 65535);
         c_out->send([this]() {
@@ -493,7 +501,7 @@ void PurpleLine::update_rooms(line::MessageBoxWrapUpList wrap_up_list) {
 
         get_group_invites();
 }
-
+*/
 void PurpleLine::get_group_invites() {
         c_out->send_getGroupIdsInvited();
         c_out->send([this]() {

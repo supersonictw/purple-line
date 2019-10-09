@@ -3,9 +3,9 @@
 #define LINE_PRPL_ID "prpl-line"
 
 #define LINE_THRIFT_SERVER "gd2.line.naver.jp"
-#define LINE_OS_SERVER "os.line.naver.jp"
-#define LINE_OS_URL "https://os.line.naver.jp/"
-#define LINE_STICKER_URL "http://dl.stickershop.line.naver.jp/products/"
+#define LINE_OS_SERVER "obs.line-apps.com"
+#define LINE_OS_URL "https://obs.line-cdn.net/"
+#define LINE_STICKER_URL "http://stickershop.line-cdn.net/products/"
 #define LINE_VERIFICATION_URL "https://gd2.line.naver.jp/Q"
 
 #define LINE_LOGIN_PATH "/api/v4/TalkService.do"

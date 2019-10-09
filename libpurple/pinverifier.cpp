@@ -89,8 +89,7 @@ void PINVerifier::verify(
                    // JSON decode
                     nlohmann::json json_decoded = nlohmann::json::parse(json);
 
-                    //error("JSON Test: " + (std::string)json_decoded["result"]["verifier"]);
-
+                    // Set Login Query URL
                     parent.c_out->set_path(LINE_LOGINZ_PATH);
 
                      line::LoginRequest req;
