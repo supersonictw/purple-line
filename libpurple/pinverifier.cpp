@@ -4,6 +4,8 @@
 #include <util.h>
 #include <eventloop.h>
 
+#include "json_decode.hpp"
+
 #include "purpleline.hpp"
 #include "wrapper.hpp"
 
@@ -84,9 +86,14 @@ void PINVerifier::verify(
                     }
                     */
 
+                   // JSON decode
+                    nlohmann::json json_decoded = nlohmann::json::parse(json);
+
+                    //error("JSON Test: " + (std::string)json_decoded["result"]["verifier"]);
+
                      line::LoginRequest req;
                      req.type = line::LoginType::QRCODE;
-                     req.verifier = verifier;
+                     req.verifier = (std::string)json_decoded["result"]["verifier"];
                      req.e2eeVersion = 0;
 
                      parent.c_out->send_loginZ(req);
