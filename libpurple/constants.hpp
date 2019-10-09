@@ -4,7 +4,7 @@
 
 #define LINE_THRIFT_SERVER "gd2.line.naver.jp"
 #define LINE_OS_SERVER "obs.line-apps.com"
-#define LINE_OS_URL "https://obs.line-cdn.net/"
+#define LINE_OS_URL "https://obs.line-apps.com/"
 #define LINE_STICKER_URL "http://stickershop.line-cdn.net/products/"
 #define LINE_VERIFICATION_URL "https://gd2.line.naver.jp/Q"
 
