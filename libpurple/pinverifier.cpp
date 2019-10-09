@@ -84,18 +84,18 @@ void PINVerifier::verify(
                     }
                     */
 
-                     line::LoginRequest re_req;
-                     re_req.type = line::LoginType::QRCODE;
-                     re_req.verifier = verifier;
-                     re_req.e2eeVersion = 0;
+                     line::LoginRequest req;
+                     req.type = line::LoginType::QRCODE;
+                     req.verifier = verifier;
+                     req.e2eeVersion = 0;
 
-                     parent.c_out->send_loginZ(re_req);
+                     parent.c_out->send_loginZ(req);
                      parent.c_out->send([this, verifier, success]() {
-                         line::LoginResult re_req_result;
+                         line::LoginResult req_result;
 
                          try
                          {
-                             parent.c_out->recv_loginZ(re_req_result);
+                             parent.c_out->recv_loginZ(req_result);
                          }
                          catch (line::TalkException &err)
                          {
@@ -104,7 +104,7 @@ void PINVerifier::verify(
                              return;
                          }
 
-                         if (re_req_result.authToken == "")
+                         if (req_result.authToken == "")
                          {
                              error("Account verification failed: no auth token.");
                              return;
@@ -112,7 +112,7 @@ void PINVerifier::verify(
 
                          end();
 
-                         success(re_req_result.authToken, re_req_result.certificate);
+                         success(req_result.authToken, req_result.certificate);
                      });
                  });
 }
