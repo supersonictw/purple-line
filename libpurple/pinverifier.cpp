@@ -91,6 +91,8 @@ void PINVerifier::verify(
 
                     //error("JSON Test: " + (std::string)json_decoded["result"]["verifier"]);
 
+                    parent.c_out->set_path(LINE_LOGINZ_PATH);
+
                      line::LoginRequest req;
                      req.type = line::LoginType::QRCODE;
                      req.verifier = (std::string)json_decoded["result"]["verifier"];

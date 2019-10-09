@@ -188,7 +188,8 @@ void PurpleLine::get_auth_token()
                 purple_debug_info("line", "Starting PIN verification.\n");
 
                 pin_verifier.verify(result, [this](std::string auth_token, std::string certificate) {
-                    (void)auth_token;
+                    //(void)auth_token;
+                    set_auth_token(auth_token);
 
                     if (certificate != "")
                     {
