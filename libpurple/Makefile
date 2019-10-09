@@ -57,8 +57,8 @@ thrift_line/line_types.cpp thrift_line/line_constants.cpp: thrift_line/TalkServi
 $(THRIFT):
 	mkdir -p $(THRIFT_STATIC_DIR)
 	wget -P $(THRIFT_STATIC_DIR) \
-		http://mirror.netinch.com/pub/apache/thrift/0.9.2/thrift-0.9.2.tar.gz
-	tar xf $(THRIFT_STATIC_DIR)/thrift-0.9.2.tar.gz	\
+		http://www.apache.org/dist/thrift/0.9.3/thrift-0.9.3.tar.gz
+	tar xf $(THRIFT_STATIC_DIR)/thrift-0.9.3.tar.gz	\
 		-C $(THRIFT_STATIC_DIR) --strip-components 1
 	cd $(THRIFT_STATIC_DIR); ./configure \
 		--with-pic \
